@@ -1,0 +1,56 @@
+{ "height":8,
+ "hexsidelength":16,
+ "layers":[
+        {
+         "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 2, 2, 3, 3, 2, 0, 0, 0, 0, 2, 2, 3, 3, 2, 2, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         "height":8,
+         "name":"layer1",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":9,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "data":[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 12, 8, 0, 0, 0, 0, 0, 0, 10, 11, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 14, 0, 0, 0, 0, 0, 0, 17, 18, 0, 0, 0, 6, 0, 0, 0, 16, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         "height":8,
+         "name":"robots",
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":9,
+         "x":0,
+         "y":0
+        }],
+ "nextobjectid":3,
+ "orientation":"hexagonal",
+ "properties":
+    {
+
+    },
+ "renderorder":"right-down",
+ "staggeraxis":"y",
+ "staggerindex":"odd",
+ "tileheight":32,
+ "tilesets":[
+        {
+         "firstgid":1,
+         "image":"..\/..\/..\/..\/tiles.png",
+         "imageheight":96,
+         "imagewidth":192,
+         "margin":0,
+         "name":"tiles",
+         "properties":
+            {
+
+            },
+         "spacing":0,
+         "tilecount":18,
+         "tileheight":32,
+         "tilewidth":32
+        }],
+ "tilewidth":32,
+ "version":1,
+ "width":9
+}
