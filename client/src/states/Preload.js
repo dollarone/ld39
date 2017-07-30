@@ -5,6 +5,7 @@ class Preload extends Phaser.State {
 		this.game.load.spritesheet('logo-tiles', 'assets/gfx/logo-tiles.png', 17, 16)
 		this.game.load.spritesheet('chars', 'assets/gfx/chars.png', 32, 32)
 		this.game.load.spritesheet('tiles', 'assets/gfx/tiles.png', 32, 32)
+		this.game.load.spritesheet('buttons', 'assets/gfx/buttons.png', 64, 32)
 		this.game.load.audio('dollarone', 'assets/sfx/dollarone.ogg')
 		this.game.load.image('onehourgamejamlogo', 'assets/gfx/onehourgamejamlogo.png')
 		this.game.load.audio('onehourgamejamsplash', 'assets/sfx/onehourgamejamsplash.ogg')

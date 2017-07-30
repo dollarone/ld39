@@ -15,12 +15,32 @@ class Map {
         this.startX = this.game.width / 2 - this.width*32/2 + 100
         this.startY = this.game.height / 2 - this.height*24/2
 
+        this.map = {}
+        this.map["map"] = {}
+        //this.map["robots"] = {}
+        this.special = null
+        this.robots = []
+
+        this.blockerTiles = [0, 3, 7,8,9,10,11, 13,14,15,16,17, 38,39,40,41,42,43,44, 53, 68,69,70,71,72,73,74, 83]
+
         for (let tile in parsedJSON.layers[0].data) {
             if (parsedJSON.layers[0].data[tile] != 0) {
                 let sprite = this.game.add.sprite(this.startX + offset + x*32, this.startY + y*24, 'tiles')
                 sprite.frame = parsedJSON.layers[0].data[tile] - 1
                 sprite.anchor.setTo(0.5)
+                if (sprite.frame == 53 || sprite.frame == 83) {
+                    this.special = this.game.add.sprite(this.startX + offset + x*32, this.startY + y*24-32, 'tiles')
+                    this.special.frame = sprite.frame - 6
+                    this.special.anchor.setTo(0.5)
+                }
             }
+            if (undefined == this.map["map"][y]) {
+                this.map["map"][y] = [this.height]
+            }
+            if (undefined == this.map["map"][y][x]) {
+                this.map["map"][y][x] = [this.width]
+            }
+            this.map["map"][y][x] = parsedJSON.layers[0].data[tile] - 1
 
             x+=1
             if (x%this.width == 0) {
@@ -35,49 +55,77 @@ class Map {
             }
             
         }
+        //console.log(" THE MAP" + JSON.stringify(this.map["map"]))
+    }
 
-    //console.log(parsedJSON.layers[0].objects[item]);
-    //var type = parsedJSON.layers[0].objects[item].properties.type;
-    //var x = parseInt(parsedJSON.layers[0].objects[item].x/32);
-    //var y = parseInt(parsedJSON.layers[0].objects[item].y/32);
-    //for (item in items) {
-    //    if (items[item].type == type) {
-    //        items[item].x = x;
-    //        items[item].y = y;
-    //    }
-    //}
-    //console.log(tile.toString())
+    canMove(x, y) {
+        if( x < 0 || x > this.width || y < 0 || y > this.height ) {
+            return false
+        }
+
+        //console.log("looking for " + x + "/" + y)
+        //console.log("found " + this.map["map"][y][x])
+        let mapTile = this.map["map"][y][x]
+        //let robotsTile = this.map["robots"][y][x]
+        
+
+        if (mapTile != -1 && this.blockerTiles.indexOf(mapTile) == -1) {
+            for(let i=0; i<this.robots.length; i++) {
+                if (!this.robots[i].dead && this.robots[i].mapX == x && this.robots[i].mapY == y
+                    && this.robots[i].sprite.frame != 5 && this.robots[i].sprite.frame != 6 && this.robots[i].sprite.frame != 12) {
+                    return false
+                }
+            }
+            return true
+
+            //(38-44 inc 53 + 68-74 +83  + 0 + 3  +7-11 + 13-17
+        }
+        return false
+    }
+
+    canTarget(x, y, faction, robotType) {
+
+        if( x < 0 || x >= this.width || y < 0 || y >= this.height ) {
+            return false
+        }
+        let mapTile = this.map["map"][y][x]
+        if (mapTile == -1) {
+            return false
+        }
+
+        if (robotType == 11 || robotType == 17) {
+            return true
+        }
 
 
-/*
-        this.map = this.game.add.tilemap('map2')
+        if (this.blockerTiles.indexOf(mapTile) == -1) {
+            for(let i=0; i<this.robots.length; i++) {
+               // console.log("ro" + robotType)
+                if (!this.robots[i].dead && this.robots[i].sprite.frame != 5 && this.robots[i].sprite.frame != 6 && this.robots[i].sprite.frame != 12 
+                    && this.robots[i].mapX == x && this.robots[i].mapY == y && (robotType === 7 || robotType === 13 || this.robots[i].faction != faction)) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
 
-        this.map.addTilesetImage('tiles', 'tiles')
-
-        //this.blockedLayer = this.map.createLayer('objectLayer')
-        this.blockedLayer = this.map.createLayer('blockedLayer')
-        //this.foregroundLayer = this.map.createLayer('foregroundLayer')
-
-        //this.map.setCollisionBetween(1, 10000, true, 'blockedLayer')
-
-        // make the world boundaries fit the ones in the tiled map
-        this.blockedLayer.resizeWorld()
+// assumes you have checked via canTarget
+    getTarget(x, y, faction, robotType) {
 
 
-        var result = this.findObjectsByType('exit', this.map, 'objectLayer')
-        this.exit = this.game.add.sprite(result[0].x, result[0].y, 'tiles')
-        this.exit.frame = 8
-        this.game.physics.arcade.enable(this.exit)
-        this.exit.body.setSize(1, 1, 3, 5)
-        this.winnar = false
+        let mapTile = this.map["map"][y][x]
 
-        var result = this.findObjectsByType('playerStart', this.map, 'objectLayer')
-        this.playerStartX =  result[0].x
-        this.playerStartY =  result[0].y
-        this.player = this.game.add.sprite(result[0].x, result[0].y, 'chars')
-        this.player.frame = 1;
-
-*/
+        if (this.blockerTiles.indexOf(mapTile) == -1) {
+            for(let i=0; i<this.robots.length; i++) {
+               // console.log("ro" + robotType)
+                if (this.robots[i].sprite.frame != 5 && this.robots[i].sprite.frame != 6 && this.robots[i].sprite.frame != 12 
+                    && this.robots[i].mapX == x && this.robots[i].mapY == y && (robotType === 7 || robotType === 13 || this.robots[i].faction != faction)) {
+                    return this.robots[i]
+                }
+            }
+        }
+        return null
     }
 
     update() {

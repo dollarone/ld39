@@ -33,9 +33,32 @@ class Main extends Phaser.State {
         this.myText = this.game.add.text(332, 32, "started (not yet connected)", { font: "14px Arial", fill: "#ff0044"})
         this.game.time.advancedTiming = true
         this.gameStarted = false
-        this.allRobots = null
-        this.inspector = new Inspector(this.game, 55, 50)
+        
+        this.inspector = new Inspector(this.game, 55, 50, this.map)
+        this.nextTurnButton = this.game.add.button(30, 30, 'buttons', this.nextTurn, this, 0, 0, 0, 1)
+
+        this.currentPlayerLabel = this.game.add.text(5, 12, "", { font: "14px Arial", fill: "#000000"})
+        this.currentPlayer = -1
+        this.nextTurnCooldown = 100
+        this.turn = null
+        this.players = []
 	}
+
+    nextTurn() {
+        if (this.nextTurnCooldown==0) {
+            for(let i=0; i<this.map.robots.length; i++) {
+                if(!this.map.robots[i].dead && this.map.robots[i].faction == this.players[this.currentPlayer] && this.map.robots[i].battery < this.map.robots[i].maxBattery) {
+                    this.map.robots[i].battery += 1
+                }
+            }
+            this.inspector.clear()
+            this.currentPlayer = (this.currentPlayer+1)%2
+            this.nextTurnCooldown = 100
+            this.currentPlayerLabel.text = "" + this.players[this.currentPlayer] + "'s turn"
+            this.game.currentPlayer = this.players[this.currentPlayer]
+        }
+
+    }
 
 	restart() {
 		this.game.state.restart()
@@ -49,6 +72,9 @@ class Main extends Phaser.State {
 	}
 	update() {
 		this.step += 1
+        if (this.nextTurnCooldown>0) {
+            this.nextTurnCooldown -= 1
+        }
 
 		if (this.gameover) {
 			return
@@ -66,7 +92,7 @@ class Main extends Phaser.State {
 	loadRobots(robots) {
 		let offset = 0
 		for (let robot in robots) {
-			console.log(robot)
+			//console.log(robot)
 
             if (robots[robot]["y"]%2 == 0) {
                 offset = 0
@@ -74,9 +100,20 @@ class Main extends Phaser.State {
             else {
                 offset = 16
             }
-        	let newRobot = new Robot(this.game, robots[robot]["frame"], this.map.startX + robots[robot]["x"]*32 + offset, this.map.startY + robots[robot]["y"]*24, this.inspector)
-	        console.log("newRobot: " + newRobot.toString())
-	   	}		
+        	let newRobot = new Robot(this.game, robots[robot]["frame"], this.map.startX + robots[robot]["x"]*32 + offset, this.map.startY + robots[robot]["y"]*24, 
+                robots[robot]["x"], robots[robot]["y"], this.inspector)
+            this.map.robots.push(newRobot)
+	        //console.log("newRobot: " + newRobot.toString())
+	   	}
+        for(let i=0; i<this.map.robots.length; i++) {
+            if (!(this.map.robots[i].sprite.frame == 5 || this.map.robots[i].sprite.frame == 6 || this.map.robots[i].sprite.frame == 12)) {
+                this.map.robots[i].sprite.bringToTop()
+            }
+        }
+        if (this.map.special != null) {
+            this.map.special.bringToTop()
+        }
+ 
 	}
 
     openConnection() {
@@ -114,6 +151,13 @@ class Main extends Phaser.State {
         	
         	this.loadRobots(msg.robots)
             this.gameStarted = true
+            this.currentPlayer = msg.currentPlayer
+            
+            // from server, really:
+            this.players[0] = "Blue Sun"
+            this.players[1] = "Big E Corporate"
+            this.currentPlayerLabel.text = "" + this.players[this.currentPlayer] + "'s turn"
+            this.game.currentPlayer = this.players[this.currentPlayer]
         }
         else if (undefined != msg.status && msg.status == "exit") {
             this.state.start('Postgame', true, false, msg.player.items)

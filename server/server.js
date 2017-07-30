@@ -234,7 +234,7 @@ function startNewGame(ws, users, gameType, mapNum) {
     games[gameNumber]["gameNumber"] = gameNumber
     games[gameNumber]["playerCount"] = users.length
     games[gameNumber]["players"] = [users.length]
-    games[gameNumber]["nextPlayer"] = getRandomInt(1, users.length)
+    games[gameNumber]["currentPlayer"] = getRandomInt(0, users.length)
     games[gameNumber]["mapNum"] = mapNum
 
     console.log( users.length + " users : " + JSON.stringify(users) + " , " + gameType + ", map: " + mapNum)
@@ -242,12 +242,16 @@ function startNewGame(ws, users, gameType, mapNum) {
     for (let x=0; x<users.length; x++) {
         games[gameNumber]["players"][x] = {}
         games[gameNumber]["players"][x]["user"] = users[x]
-        games[gameNumber]["players"][x]["parts"] = 0
+        games[gameNumber]["players"][x]["batteryBonus"] = 0
         if (users[x] != games[gameNumber]["nextPlayer"]) {
-            games[gameNumber]["players"][x]["parts"] = 50
+            games[gameNumber]["players"][x]["batteryBonus"] = 1
         }
         
     }
+
+    //add faction randomly, for now assume:
+    //users[0] = "Blue Sun"
+    //users[1] = "Big E Corporate"
 
 /*    game[gameNumber]["player1"] = user[0]
     if (users.length > 1) {
@@ -265,7 +269,7 @@ function startNewGame(ws, users, gameType, mapNum) {
     games[gameNumber]["map"] = map[0]["map"]
     games[gameNumber]["robots"] = map[0]["robots"]
     games[gameNumber]["onGoing"] = true
-console.log( games[gameNumber]["robots"])
+console.log( "robots: " + JSON.stringify(games[gameNumber]["robots"]))
     
 
     let sentUsers = {}
@@ -273,6 +277,11 @@ console.log( games[gameNumber]["robots"])
         let payload = new Object();
         payload["status"] = "gameStarted"
         payload["robots"] = games[gameNumber]["robots"]
+        payload["playerCount"] = games[gameNumber]["playerCount"]
+        payload["currentPlayer"] = games[gameNumber]["currentPlayer"]
+        payload["mapNum"] = games[gameNumber]["mapNum"]
+        // also send batterybonus
+
         if (sentUsers[users[user]] != undefined) {
         }
         else {
