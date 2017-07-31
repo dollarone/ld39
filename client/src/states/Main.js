@@ -34,28 +34,45 @@ class Main extends Phaser.State {
         this.game.time.advancedTiming = true
         this.gameStarted = false
         
-        this.inspector = new Inspector(this.game, 55, 50, this.map)
-        this.nextTurnButton = this.game.add.button(30, 30, 'buttons', this.nextTurn, this, 0, 0, 0, 1)
+        this.inspector = new Inspector(this.game, 6, 70, this.map)
+        this.nextTurnButton = this.game.add.button(6, 30, 'buttons', this.nextTurn, this)//, null, null, 0, 1)
+        this.nextTurnButton._onUpFrame = 0
+        this.nextTurnButton._onDownFrame = 1
+
+        this.deselectButton = this.game.add.button(80, 30, 'buttons', this.deselect, this)//, null, null, 0, 1)
+        this.deselectButton.frame = 2
+        this.deselectButton._onUpFrame = 2
+        this.deselectButton._onDownFrame = 3
 
         this.currentPlayerLabel = this.game.add.text(5, 12, "", { font: "14px Arial", fill: "#000000"})
         this.currentPlayer = -1
-        this.nextTurnCooldown = 100
+        this.nextTurnCooldown = 0
         this.turn = null
         this.players = []
+        this.firstTurn = true
+
+        this.gameover = false
 	}
 
+    deselect() {
+        this.inspector.clear()
+    }
+
     nextTurn() {
+        console.log("turn ended by : " + this.game.currentPlayer)
         if (this.nextTurnCooldown==0) {
-            for(let i=0; i<this.map.robots.length; i++) {
-                if(!this.map.robots[i].dead && this.map.robots[i].faction == this.players[this.currentPlayer] && this.map.robots[i].battery < this.map.robots[i].maxBattery) {
-                    this.map.robots[i].battery += 1
-                }
-            }
             this.inspector.clear()
             this.currentPlayer = (this.currentPlayer+1)%2
-            this.nextTurnCooldown = 100
+            this.nextTurnCooldown = 50
             this.currentPlayerLabel.text = "" + this.players[this.currentPlayer] + "'s turn"
             this.game.currentPlayer = this.players[this.currentPlayer]
+            console.log("new turn for : " + this.game.currentPlayer)            
+            for(let i=0; i<this.map.robots.length; i++) {
+                if(!this.map.robots[i].dead && this.map.robots[i].battery < this.map.robots[i].maxBattery && this.map.robots[i].sprite.frame != 5) {
+                    this.map.robots[i].battery += 1
+                    
+                }
+            }
         }
 
     }
@@ -72,22 +89,61 @@ class Main extends Phaser.State {
 	}
 	update() {
 		this.step += 1
-        if (this.nextTurnCooldown>0) {
+        if (this.nextTurnCooldown > 0) {
             this.nextTurnCooldown -= 1
         }
 
-		if (this.gameover) {
-			return
-		}
-
-		this.statusLabel.text = this.step
-
-
-		if (this.gameStarted) {
-
-
+		if (this.gameStarted && !this.gameover) {
+            this.checkWin()
 		}
 	}
+
+    checkWin() {
+        /*
+        recall: 
+
+this.players[0] = "Big E Corporate"
+this.players[1] = "Blue Sun"        
+            */
+        let p0HasUnit = false
+        let p0HasFactory = false        
+        let p1HasUnit = false
+        let p1HasFactory = false        
+
+        for(let i=0; i<this.map.robots.length; i++) {
+            if(!this.map.robots[i].dead) {
+                if(this.map.robots[i].sprite.frame == 6 || this.map.robots[i].sprite.frame == 12) {
+                    if(this.map.robots[i].faction == this.players[0]) {
+                        p0HasFactory = true
+                    }
+                    else if(this.map.robots[i].faction == this.players[1]) {
+                        p1HasFactory = true
+                    }
+                }
+                else {
+                    if(this.map.robots[i].faction == this.players[0]) {
+                        p0HasUnit = true
+                    }
+                    else if(this.map.robots[i].faction == this.players[1]) {
+                        p1HasUnit = true
+                    }
+                }
+            }
+            
+        }
+        if (!p0HasUnit && !p0HasFactory) {
+            this.result = this.players[1] + " has won this war!"
+            this.gameover = true
+            this.game.add.text(200, 400, this.result, { font: "24px Arial", fill: "#ff0044"})
+        }
+        if (!p1HasUnit && !p1HasFactory) {
+            this.result = this.players[0] + " has won this war!"
+            this.gameover = true
+            this.game.add.text(200, 400, this.result, { font: "24px Arial", fill: "#ff0044"})
+        }
+
+
+    }
 
 	loadRobots(robots) {
 		let offset = 0
@@ -102,6 +158,12 @@ class Main extends Phaser.State {
             }
         	let newRobot = new Robot(this.game, robots[robot]["frame"], this.map.startX + robots[robot]["x"]*32 + offset, this.map.startY + robots[robot]["y"]*24, 
                 robots[robot]["x"], robots[robot]["y"], this.inspector)
+
+            // give the non-starting player(s) a boost
+            if(newRobot.faction != this.game.currentPlayer && (newRobot.sprite.frame == 6 || newRobot.sprite.frame == 12)) {
+                newRobot.battery += 1
+            }
+
             this.map.robots.push(newRobot)
 	        //console.log("newRobot: " + newRobot.toString())
 	   	}
@@ -149,15 +211,19 @@ class Main extends Phaser.State {
         else if (undefined != msg.status && msg.status == "gameStarted") {
         	console.log( "received gameStarted with robots: " + msg.robots)
         	
-        	this.loadRobots(msg.robots)
-            this.gameStarted = true
+            // from server, really:
+            this.players[0] = "Big E Corporate"
+            this.players[1] = "Blue Sun"
+
             this.currentPlayer = msg.currentPlayer
             
-            // from server, really:
-            this.players[0] = "Blue Sun"
-            this.players[1] = "Big E Corporate"
             this.currentPlayerLabel.text = "" + this.players[this.currentPlayer] + "'s turn"
             this.game.currentPlayer = this.players[this.currentPlayer]
+
+            this.loadRobots(msg.robots)
+            this.gameStarted = true
+            this.firstTurn = true
+            
         }
         else if (undefined != msg.status && msg.status == "exit") {
             this.state.start('Postgame', true, false, msg.player.items)
@@ -242,7 +308,7 @@ class Main extends Phaser.State {
 
 	
 	render() {
-		this.game.debug.text(this.game.time.fps, 420, 20, "#00ff00")
+		//this.game.debug.text(this.game.time.fps, 420, 20, "#00ff00")
 		
 	}
 }

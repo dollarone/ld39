@@ -120,7 +120,7 @@ class Map {
             for(let i=0; i<this.robots.length; i++) {
                // console.log("ro" + robotType)
                 if (this.robots[i].sprite.frame != 5 && this.robots[i].sprite.frame != 6 && this.robots[i].sprite.frame != 12 
-                    && this.robots[i].mapX == x && this.robots[i].mapY == y && (robotType === 7 || robotType === 13 || this.robots[i].faction != faction)) {
+                    && this.robots[i].mapX == x && this.robots[i].mapY == y && (robotType == 7 || robotType == 13 || this.robots[i].faction != faction)) {
                     return this.robots[i]
                 }
             }
