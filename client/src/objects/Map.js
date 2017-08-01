@@ -4,8 +4,8 @@ class Map {
         this.game = game
 
         let parsedJSON = this.game.cache.getJSON('testmap')
-       // console.log(parsedJSON)
-      //  console.log(parsedJSON.layers[0].data)
+        //console.log(parsedJSON)
+        //console.log(parsedJSON.layers[0].data)
 
         let x = 0
         let y = 0
@@ -92,7 +92,6 @@ class Map {
         if (mapTile == -1) {
             return false
         }
-
         if (robotType == 11 || robotType == 17) {
             return true
         }
@@ -119,8 +118,8 @@ class Map {
         if (this.blockerTiles.indexOf(mapTile) == -1) {
             for(let i=0; i<this.robots.length; i++) {
                // console.log("ro" + robotType)
-                if (this.robots[i].sprite.frame != 5 && this.robots[i].sprite.frame != 6 && this.robots[i].sprite.frame != 12 
-                    && this.robots[i].mapX == x && this.robots[i].mapY == y && (robotType == 7 || robotType == 13 || this.robots[i].faction != faction)) {
+                if (!this.robots[i].dead && this.robots[i].sprite.frame != 5 && this.robots[i].sprite.frame != 6 && this.robots[i].sprite.frame != 12 
+                    && this.robots[i].mapX == x && this.robots[i].mapY == y && (robotType === 7 || robotType === 13 || this.robots[i].faction != faction)) {
                     return this.robots[i]
                 }
             }

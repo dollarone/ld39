@@ -375,7 +375,8 @@ class Inspector {
                     }
                     if(x==0 && y==0 || x==maxX && y==minY || x==maxX && y==maxY || x==maxX && y!=0) {
                         // do nothing
-                    } else if (object.range == 3 && colOffset == 1 && (y==minY || y==maxY) && x==maxX-1 && (y>maxY-1 || y<minY+1)) {
+                    } 
+                    else if (object.range == 3 && colOffset == 1 && (y==minY || y==maxY) && x==maxX-1 && (y>maxY-1 || y<minY+1)) {
                         // what is this
                     }
                     else if (object.range == 3 && colOffset == 0 && (y==minY || y==maxY) && x==minX && (y>maxY-1 || y<minY+1)) {
@@ -388,21 +389,20 @@ class Inspector {
                         || (x==2 && y==3 && colOffset == 0)
                         || (x==2 && y==2 && colOffset == 1) 
                         || (x==-3 && y==3 && colOffset == 1) 
-                        || (x==-3 && y==2 && colOffset == 0) 
-                        //// fix for range=1
-                        || (x==0 && y==1) 
+                        || (x==-3 && y==2 && colOffset == 0))) {
+
+                    }
+                    else if((object.sprite.frame == 11 || object.sprite.frame == 17) &&
+                         ( (x==0 && y==1) 
                         || (x==0 && y==-1) 
                         || (x==1 && y==0) 
                         || (x==-1 && y==1) 
                         || (x==-1 && y==-1) 
-                        || (x==-1 && y==0) 
-
-                        )) {
-
+                        || (x==-1 && y==0) )) {
                     }
 
                     else {
-
+ 
                         if (this.map.canTarget(object.mapX + x + colOffset  + rowOffset , object.mapY + y, object.faction, object.sprite.frame)) {
                             //console.log(object.mapX + "/" + object.mapY + " and x/y : " + x + "/" + y + " and minX/Y : " + minX  + "/" + minY + " and maxX/Y : " + maxX + "/" + maxY + " colOffset : " + colOffset)
                             if ((object.mapY+y)%2==0) {

@@ -6,10 +6,10 @@ import Inspector from 'objects/Inspector'
 
 class Main extends Phaser.State {
 
-	init(playerName = "Dr. Evil", gameType = "local") {
-		this.playerName = playerName
-		this.gameType = gameType
-	}
+    init(playerName = "Dr. Evil", gameType = "local") {
+        this.playerName = playerName
+        this.gameType = gameType
+    }
 
 	create() {
 
@@ -18,8 +18,8 @@ class Main extends Phaser.State {
 		this.game.stage.backgroundColor = '639bff'//'#5fcde4'//'#98FB98'
 
 
-    this.splashMusic = this.game.add.audio('splash')
-    this.splashMusic.play()
+        this.splashMusic = this.game.add.audio('splash')
+        this.splashMusic.loopFull();
 
 
 		this.step = -1
@@ -38,7 +38,7 @@ class Main extends Phaser.State {
         this.myText = this.game.add.text(332, 32, "started (not yet connected)", { font: "14px Arial", fill: "#ff0044"})
         this.game.time.advancedTiming = true
         this.gameStarted = false
-this.myText.visible = false
+        this.myText.visible = false
         
         this.inspector = new Inspector(this.game, 6, 70, this.map)
         this.nextTurnButton = this.game.add.button(6, 30, 'buttons', this.nextTurn, this)//, null, null, 0, 1)
