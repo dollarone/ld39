@@ -46,6 +46,7 @@ class Inspector {
         }
 
         this.builds = {}
+        this.buildCost = {}
 
         let buildX = 70
         let buildY = 230
@@ -60,13 +61,22 @@ class Inspector {
                 this.builds[i].visible = false
                 this.builds[i].inputEnabled = true
                 this.builds[i].events.onInputDown.add(this.build, this)
-                buildY+=40
+                this.buildCost[i] = this.game.add.text(buildX-30, buildY-6, "1:", { font: "10px Arial", fill: "#000000"})
+                this.buildCost[i].visible = false
+                buildY+=35
             }
-        } 
+        }
+        this.buildCost[9].text = "3:"
+        this.buildCost[10].text = "3:"
+        this.buildCost[15].text = "3:"
+        this.buildCost[11].text = "4:"
+        this.buildCost[17].text = "4:"
 
 
         this.name = this.game.add.text(x, top, "", { font: "14px Arial", fill: "#000000"})
         this.description = this.game.add.text(x, top + 80, "", { font: "10px Arial", fill: "#000000"})
+
+        
 
     }
 
@@ -232,13 +242,14 @@ class Inspector {
             for (let i=7; i<18; i++) {
                 if (i!=12) {
                     this.builds[i].visible = false
+                    this.buildCost[i].visible = false
                 }
             }
         }
         else if((object.sprite.frame == 6 || object.sprite.frame == 12) && object.faction == this.game.currentPlayer) {
-            this.description.text = "Battery: " + object.battery + " / " + object.maxBattery + "\nFaction: " + object.faction + "\n\nBuild cost:\n" +
-                "             1:\n\n             1:\n\n             3:\n\n             3:\n\n             4:\n" + 
-                "\nClick to buy (can not build if\nfactory tile is occupied)"
+            this.description.text = "Battery: " + object.battery + " / " + object.maxBattery + "\nFaction: " + object.faction + "\n" + "\n" + "Build cost:" +
+               "\n\n\n\n\n\n\n\n\n\n\n" +
+                "\nClick to buy (can not build if\nthe factory tile is occupied by\nany unit - or if your factory does\nnot have enough battery to\ncover the build cost!)"
             this.selectedFactory = object
             for (let i=7; i<18; i++) {
                 if (i != 12) {                
@@ -255,17 +266,21 @@ class Inspector {
                 if (i < 12) {
                     if (this.game.currentPlayer == "Blue Sun") {
                         this.builds[i].visible = true
+                        this.buildCost[i].visible = true
                     }
                     else {
                         this.builds[i].visible = false
+                        this.buildCost[i].visible = false
                     }
                 }
                 if (i > 12) {
                     if (this.game.currentPlayer != "Blue Sun") {
                         this.builds[i].visible = true
+                        this.buildCost[i].visible = true
                     }
                     else {
                         this.builds[i].visible = false
+                        this.buildCost[i].visible = false
                     }
                 }
             }
@@ -281,11 +296,11 @@ class Inspector {
             for (let i=7; i<18; i++) {
                 if (i!=12) {
                     this.builds[i].visible = false
+                    this.buildCost[i].visible = false
                 }
             }
     
         }
-
         this.halo.x = object.sprite.x
         this.halo.y = object.sprite.y
         this.halo.visible = true
@@ -437,7 +452,17 @@ class Inspector {
         }
     }
 
+
     clear() {
+        for (let i=7; i<18; i++) {
+            if (i!=12) {
+                this.builds[i].visible = false
+                this.buildCost[i].visible = false
+            }
+        }
+        this.description.text = ""
+        this.sprite.visible = false
+        this.name.text = ""
         this.halo.visible = false
         let moveHighlightNo = 0
         while(moveHighlightNo<12) {

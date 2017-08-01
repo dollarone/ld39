@@ -67,7 +67,6 @@ class Main extends Phaser.State {
     nextTurn() {
         //console.log("turn ended by : " + this.game.currentPlayer)
         if (this.nextTurnCooldown==0) {
-            this.inspector.clear()
             this.currentPlayer = (this.currentPlayer+1)%2
             this.nextTurnCooldown = 50
             this.currentPlayerLabel.text = "" + this.players[this.currentPlayer] + "'s turn"
@@ -79,6 +78,7 @@ class Main extends Phaser.State {
                     
                 }
             }
+            this.inspector.clear()
         }
 
     }
