@@ -17,6 +17,11 @@ class Main extends Phaser.State {
 
 		this.game.stage.backgroundColor = '639bff'//'#5fcde4'//'#98FB98'
 
+
+    this.splashMusic = this.game.add.audio('splash')
+    this.splashMusic.play()
+
+
 		this.step = -1
 
 		this.statusLabel = this.add.text(this.game.world.width/2 - 360, 10, '')
@@ -33,6 +38,7 @@ class Main extends Phaser.State {
         this.myText = this.game.add.text(332, 32, "started (not yet connected)", { font: "14px Arial", fill: "#ff0044"})
         this.game.time.advancedTiming = true
         this.gameStarted = false
+this.myText.visible = false
         
         this.inspector = new Inspector(this.game, 6, 70, this.map)
         this.nextTurnButton = this.game.add.button(6, 30, 'buttons', this.nextTurn, this)//, null, null, 0, 1)
@@ -59,14 +65,14 @@ class Main extends Phaser.State {
     }
 
     nextTurn() {
-        console.log("turn ended by : " + this.game.currentPlayer)
+        //console.log("turn ended by : " + this.game.currentPlayer)
         if (this.nextTurnCooldown==0) {
             this.inspector.clear()
             this.currentPlayer = (this.currentPlayer+1)%2
             this.nextTurnCooldown = 50
             this.currentPlayerLabel.text = "" + this.players[this.currentPlayer] + "'s turn"
             this.game.currentPlayer = this.players[this.currentPlayer]
-            console.log("new turn for : " + this.game.currentPlayer)            
+            //console.log("new turn for : " + this.game.currentPlayer)            
             for(let i=0; i<this.map.robots.length; i++) {
                 if(!this.map.robots[i].dead && this.map.robots[i].battery < this.map.robots[i].maxBattery && this.map.robots[i].sprite.frame != 5) {
                     this.map.robots[i].battery += 1
@@ -179,7 +185,7 @@ this.players[1] = "Blue Sun"
 	}
 
     openConnection() {
-        this.ws = new WebSocket("ws://localhost:8988")//ws://dollarone.games:8988")
+        this.ws = new WebSocket("ws://dollarone.games:8988")
         this.connected = false
         this.ws.onmessage = this.onMessage.bind(this)
         this.ws.onerror = this.displayError.bind(this)
@@ -189,7 +195,7 @@ this.players[1] = "Blue Sun"
     connectionOpen() {
         this.connected = true
         this.myText.text = 'connected\n'
-		this.ws.send(JSON.stringify({action: "setNick", nick: this.playerName}))
+	//	this.ws.send(JSON.stringify({action: "setNick", nick: this.playerName}))
 
     }
 
@@ -209,7 +215,7 @@ this.players[1] = "Blue Sun"
             this.ws.send(JSON.stringify({action: "findGame", gameType: this.gameType}))
         }
         else if (undefined != msg.status && msg.status == "gameStarted") {
-        	console.log( "received gameStarted with robots: " + msg.robots)
+        	//console.log( "received gameStarted with robots: " + msg.robots)
         	
             // from server, really:
             this.players[0] = "Big E Corporate"

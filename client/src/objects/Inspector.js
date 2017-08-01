@@ -48,10 +48,10 @@ class Inspector {
         this.builds = {}
 
         let buildX = 70
-        let buildY = 223
+        let buildY = 230
         for(let i=7; i<18; i++) {
             if (i==12) {
-                buildY = 223
+                buildY = 230
             }
             else {
                 this.builds[i] = this.game.add.sprite(buildX, buildY, 'tiles')
@@ -60,7 +60,7 @@ class Inspector {
                 this.builds[i].visible = false
                 this.builds[i].inputEnabled = true
                 this.builds[i].events.onInputDown.add(this.build, this)
-                buildY+=50
+                buildY+=40
             }
         } 
 
@@ -79,10 +79,10 @@ class Inspector {
         else if (destTile.frame == 11 || destTile.frame == 17) {
             cost = 4
         }
-        console.log("build " + destTile.frame + " (cost " + cost  + ") at " + this.mapX + "," + this.mapY)
+        //console.log("build " + destTile.frame + " (cost " + cost  + ") at " + this.mapX + "," + this.mapY)
 
         if(this.selectedFactory.battery - cost < 0) {
-            console.log("too expensive mate")
+          //  console.log("too expensive mate")
             return
         }
         this.selectedFactory.battery -= cost
@@ -178,12 +178,12 @@ class Inspector {
     move(destTile) {
 //        console.log("str: " + str.x + "/" + str.y )
  //       console.log("str: " + str.robot.description)
-console.log("move")
+//console.log("move")
         let robot = destTile.robot
         if (robot.battery - robot.moveCost >= 0) {
             for(let i=0; i<this.map.robots.length; i++) {
                 if (robot === this.map.robots[i]) {
-                    console.log("happy")
+                    //console.log("happy")
                     this.map.robots[i].mapX = destTile.mapX
                     this.map.robots[i].mapY = destTile.mapY
                     this.map.robots[i].sprite.x = destTile.x
@@ -236,8 +236,8 @@ console.log("move")
             }
         }
         else if((object.sprite.frame == 6 || object.sprite.frame == 12) && object.faction == this.game.currentPlayer) {
-            this.description.text = "Battery: " + object.battery + "\nFaction: " + object.faction + "\n\nBuild cost:\n" +
-                "             1:\n\n\n             1:\n\n\n             3:\n\n\n             3:\n\n\n             4:\n" + 
+            this.description.text = "Battery: " + object.battery + " / " + object.maxBattery + "\nFaction: " + object.faction + "\n\nBuild cost:\n" +
+                "             1:\n\n             1:\n\n             3:\n\n             3:\n\n             4:\n" + 
                 "\nClick to buy (can not build if\nfactory tile is occupied)"
             this.selectedFactory = object
             for (let i=7; i<18; i++) {

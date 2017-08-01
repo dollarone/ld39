@@ -4,8 +4,8 @@ class Map {
         this.game = game
 
         let parsedJSON = this.game.cache.getJSON('testmap')
-        console.log(parsedJSON)
-        console.log(parsedJSON.layers[0].data)
+       // console.log(parsedJSON)
+      //  console.log(parsedJSON.layers[0].data)
 
         let x = 0
         let y = 0

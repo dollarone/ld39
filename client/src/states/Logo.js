@@ -180,7 +180,8 @@ class Logo extends Phaser.State {
   	skip() {
 	    if (!this.pressed) {
 	        this.pressed = true
-	        this.state.start('Jam', true, false, this.colour, this.timeout)
+//	        this.state.start('Jam', true, false, this.colour, this.timeout)
+this.game.state.start("Main")
 	    }
 	}
 
@@ -188,7 +189,8 @@ class Logo extends Phaser.State {
 
 	    if (this.startTime < this.game.time.now - (this.timeout*1000) && !this.pressed) {
 	        this.pressed = true
-	        this.state.start('Jam', true, false, this.colour, this.timeout)
+this.game.state.start("Main")
+	       // this.state.start('Jam', true, false, this.colour, this.timeout)
 	    }
 	}
 

@@ -161,7 +161,7 @@ let gameNumber = 0
 let earliestOnGoingGame = 0
 
 wss.on('connection', function(ws) {
-
+console.log(ws)
     console.log('connected: ' + ws.upgradeReq.headers['sec-websocket-key'])
     var user = ws.upgradeReq.headers['sec-websocket-key']
 //    console.log('connected: ' + ws.upgradeReq.headers['sec-websocket-key']);
@@ -490,7 +490,7 @@ function process_and_send_events() {
     //console.log("Turn " + turn);
     for (let i=earliestOnGoingGame; i<gameNumber; i++) {
         if (games[i]["onGoing"] != undefined && games[i]["onGoing"] == true) {
-            console.log("active game: " + games[i]["gameNumber"])
+         //   console.log("active game: " + games[i]["gameNumber"])
         }
     }
     for(var i = 0; i < players.length; i++) {
@@ -638,9 +638,15 @@ function process_and_send_events() {
     var payload = {};
     payload["players"] = players;
 //    payload["items"] = items;
+
     for(var i in wss.clients) {
-        wss.clients[i].send(JSON.stringify(payload));
+        try {
+            wss.clients[i].send(JSON.stringify(payload));
+        }
+        catch (e) {
+            console.log("Woops1, error: " + e);
+        }
     }
 }
-setInterval(process_and_send_events, 400);
-    
+setInterval(process_and_send_events, 115);
+

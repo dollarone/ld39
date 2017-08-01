@@ -7,8 +7,7 @@ class Preload extends Phaser.State {
 		this.game.load.spritesheet('tiles', 'assets/gfx/tiles.png', 32, 32)
 		this.game.load.spritesheet('buttons', 'assets/gfx/buttons.png', 64, 32)
 		this.game.load.audio('dollarone', 'assets/sfx/dollarone.ogg')
-		this.game.load.image('onehourgamejamlogo', 'assets/gfx/onehourgamejamlogo.png')
-		this.game.load.audio('onehourgamejamsplash', 'assets/sfx/onehourgamejamsplash.ogg')
+		this.game.load.audio('splash', 'assets/sfx/ld39.ogg')
 		//this.game.load.atlas('myAtlas', 'assets/my-atlas.png', 'assets/my-atlas.json')
 		//this.game.load.tilemap('map0', 'assets/tilemaps/level.json', null, Phaser.Tilemap.TILED_JSON)
 		this.game.load.json('testmap', 'assets/tilemaps/map0.json')
@@ -16,8 +15,8 @@ class Preload extends Phaser.State {
 
 	create() {
 		//this.game.state.start("Logo")
-		this.game.state.start("MainMenu")
-		//this.game.state.start("Logo", true, false, "#98FB98")
+	//	this.game.state.start("MainMenu")
+		this.game.state.start("Logo", true, false, "#639bff")
 	}
 
 }
