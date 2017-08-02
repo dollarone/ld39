@@ -7,6 +7,7 @@ class Robot {
 		this.sprite.anchor.setTo(0.5, 0.5)
 		this.sprite.frame = frame
 		this.sprite.inputEnabled = true
+		this.sprite.input.useHandCursor = true
 		this.sprite.events.onInputDown.add(this.onDown, this)
 		this.mapX = mapX
 		this.mapY = mapY

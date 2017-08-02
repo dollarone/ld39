@@ -1,9 +1,10 @@
 class Map {
 
-    constructor(game){
+    constructor(game, level){
         this.game = game
+        this.level = level
 
-        let parsedJSON = this.game.cache.getJSON('testmap')
+        let parsedJSON = this.game.cache.getJSON('level' + this.level)
         //console.log(parsedJSON)
         //console.log(parsedJSON.layers[0].data)
 
@@ -71,7 +72,7 @@ class Map {
 
         if (mapTile != -1 && this.blockerTiles.indexOf(mapTile) == -1) {
             for(let i=0; i<this.robots.length; i++) {
-                if (!this.robots[i].dead && this.robots[i].mapX == x && this.robots[i].mapY == y
+                if (this.robots[i].dead==false && this.robots[i].mapX == x && this.robots[i].mapY == y
                     && this.robots[i].sprite.frame != 5 && this.robots[i].sprite.frame != 6 && this.robots[i].sprite.frame != 12) {
                     return false
                 }
@@ -100,7 +101,7 @@ class Map {
         if (this.blockerTiles.indexOf(mapTile) == -1) {
             for(let i=0; i<this.robots.length; i++) {
                // console.log("ro" + robotType)
-                if (!this.robots[i].dead && this.robots[i].sprite.frame != 5 && this.robots[i].sprite.frame != 6 && this.robots[i].sprite.frame != 12 
+                if (this.robots[i].dead==false && this.robots[i].sprite.frame != 5 && this.robots[i].sprite.frame != 6 && this.robots[i].sprite.frame != 12 
                     && this.robots[i].mapX == x && this.robots[i].mapY == y && (robotType === 7 || robotType === 13 || this.robots[i].faction != faction)) {
                     return true
                 }
@@ -118,7 +119,7 @@ class Map {
         if (this.blockerTiles.indexOf(mapTile) == -1) {
             for(let i=0; i<this.robots.length; i++) {
                // console.log("ro" + robotType)
-                if (!this.robots[i].dead && this.robots[i].sprite.frame != 5 && this.robots[i].sprite.frame != 6 && this.robots[i].sprite.frame != 12 
+                if (this.robots[i].dead==false && this.robots[i].sprite.frame != 5 && this.robots[i].sprite.frame != 6 && this.robots[i].sprite.frame != 12 
                     && this.robots[i].mapX == x && this.robots[i].mapY == y && (robotType === 7 || robotType === 13 || this.robots[i].faction != faction)) {
                     return this.robots[i]
                 }

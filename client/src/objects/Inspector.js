@@ -29,6 +29,7 @@ class Inspector {
             moveHighlight.anchor.setTo(0.5)
             moveHighlight.visible = false
             moveHighlight.inputEnabled = true
+            moveHighlight.input.useHandCursor = true
             moveHighlight.events.onInputDown.add(this.move, this)
 
             this.moveHighlights.push(moveHighlight)
@@ -40,6 +41,7 @@ class Inspector {
             target.anchor.setTo(0.5)
             target.visible = false
             target.inputEnabled = true
+            target.input.useHandCursor = true
             target.events.onInputDown.add(this.attack, this)
 
             this.targets.push(target)
@@ -60,6 +62,7 @@ class Inspector {
                 this.builds[i].anchor.setTo(0.5)
                 this.builds[i].visible = false
                 this.builds[i].inputEnabled = true
+                this.builds[i].input.useHandCursor = true
                 this.builds[i].events.onInputDown.add(this.build, this)
                 this.buildCost[i] = this.game.add.text(buildX-30, buildY-6, "1:", { font: "10px Arial", fill: "#000000"})
                 this.buildCost[i].visible = false
@@ -75,9 +78,6 @@ class Inspector {
 
         this.name = this.game.add.text(x, top, "", { font: "14px Arial", fill: "#000000"})
         this.description = this.game.add.text(x, top + 80, "", { font: "10px Arial", fill: "#000000"})
-
-        
-
     }
 
     build(destTile) {
@@ -249,7 +249,7 @@ class Inspector {
         else if((object.sprite.frame == 6 || object.sprite.frame == 12) && object.faction == this.game.currentPlayer) {
             this.description.text = "Battery: " + object.battery + " / " + object.maxBattery + "\nFaction: " + object.faction + "\n" + "\n" + "Build cost:" +
                "\n\n\n\n\n\n\n\n\n\n\n" +
-                "\nClick to buy (can not build if\nthe factory tile is occupied by\nany unit - or if your factory does\nnot have enough battery to\ncover the build cost!)"
+                "\nClick to buy (can not build if\nthe factory tile is occupied by\nany unit - or if your factory can\nnot cover the build cost!)"
             this.selectedFactory = object
             for (let i=7; i<18; i++) {
                 if (i != 12) {                
@@ -372,7 +372,7 @@ class Inspector {
             maxX = object.range
             maxY = object.range
             if(this.sprite.frame == 5 || this.sprite.frame == 6 || this.sprite.frame == 12 
-                || object.faction != this.game.currentPlayer || object.battery == 0) {
+                || object.faction != this.game.currentPlayer || object.battery == 0 || object.attackCost < object.battery) {
                 maxX=minX
                 maxY=minY
             }

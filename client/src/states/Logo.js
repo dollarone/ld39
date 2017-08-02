@@ -181,7 +181,7 @@ class Logo extends Phaser.State {
 	    if (!this.pressed) {
 	        this.pressed = true
 //	        this.state.start('Jam', true, false, this.colour, this.timeout)
-this.game.state.start("Main")
+			this.game.state.start("MainMenu", true, false, this.colour)
 	    }
 	}
 
@@ -189,7 +189,7 @@ this.game.state.start("Main")
 
 	    if (this.startTime < this.game.time.now - (this.timeout*1000) && !this.pressed) {
 	        this.pressed = true
-this.game.state.start("Main")
+			this.game.state.start("MainMenu", true, false, this.colour)
 	       // this.state.start('Jam', true, false, this.colour, this.timeout)
 	    }
 	}
