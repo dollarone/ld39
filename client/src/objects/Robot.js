@@ -112,7 +112,7 @@ class Robot {
 
 		if(this.sprite.frame == 5) {
 			this.battery = 0
-this.maxBattery=5
+			this.maxBattery = 5
 		}
 		this.maxDefence = this.defence
 		if(!(this.sprite.frame == 5 || this.sprite.frame == 6 || this.sprite.frame == 12))  {

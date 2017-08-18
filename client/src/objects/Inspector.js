@@ -2,8 +2,9 @@ import Robot from 'objects/Robot'
 
 class Inspector {
 
-    constructor(game, x, top, map){
+    constructor(game, x, top, map, ws){
         this.game = game
+        this.ws = ws
         this.graphics = this.game.add.graphics(0, 0)//this.game.height - 300)
         this.graphics.lineStyle(2, 0x323c39, 1)
         this.graphics.beginFill(0x4b692f, 1)
@@ -72,6 +73,7 @@ class Inspector {
         this.buildCost[9].text = "3:"
         this.buildCost[10].text = "3:"
         this.buildCost[15].text = "3:"
+        this.buildCost[16].text = "3:"
         this.buildCost[11].text = "4:"
         this.buildCost[17].text = "4:"
 
@@ -104,10 +106,13 @@ class Inspector {
         else {
             offset = 16
         }
-        let newRobot = new Robot(this.game, destTile.frame, this.map.startX + this.mapX*32 + offset, this.map.startY + this.mapY*24, 
-            this.mapX, this.mapY, this)
-        this.map.robots.push(newRobot)
-        this.inspect(this.selectedFactory)
+//        let newRobot = new Robot(this.game, destTile.frame, this.map.startX + this.mapX*32 + offset, this.map.startY + this.mapY*24, 
+            //this.mapX, this.mapY, this)
+        //this.map.robots.push(newRobot)
+        this.ws.send(JSON.stringify({action: "buildRobot", mapX: this.mapX, mapY: this.mapY, frame: destTile.frame}))
+
+        //this.inspect(this.selectedFactory)
+        this.clear()
 
     }
 
@@ -116,30 +121,52 @@ class Inspector {
 // could be a tile with robot or an empty tile (bombs)
         let target = destTile.target
         let attacker = destTile.attacker
+        let destX = attacker.mapX
+        let destY = attacker.mapY
         if (attacker.battery - attacker.attackCost >= 0) {
-            attacker.battery -= attacker.attackCost 
+//            attacker.battery -= attacker.attackCost 
+
+            // TODO: what do we need? the x and y of the robot, I guess, and the x and the y of the attack position
+            // then we find the robot OR - if no robot - check if it was a bomb
+            // also calculate collateral damage
+
+
             if (target!=null) {
+                destX = target.mapX
+                destY = target.mapY
+                /*
                 target.defence -= attacker.attack
                 if (target.defence < 1) {
                     target.sprite.kill()
                     target.dead = true
                 }
+                */
+
             }
-            this.inspect(attacker)
+//            this.inspect(attacker)
 
             if(attacker.sprite.frame == 7 || attacker.sprite.frame == 13) {
-                this.calculateCollateralDamage(destTile, destTile.attacker.mapX, destTile.attacker.mapY)
-                this.inspect(attacker)
-                attacker.sprite.kill()
-                attacker.dead = true
-                this.clear()
+                destX = attacker.mapX
+                destY = attacker.mapY
+
+//                this.calculateCollateralDamage(destTile, destTile.attacker.mapX, destTile.attacker.mapY)
+//                this.inspect(attacker)
+  //              attacker.sprite.kill()
+    //            attacker.dead = true
+//                this.clear()
             }
-            else if(attacker.sprite.frame == 11 || attacker.sprite.frame == 17) {
-                this.calculateCollateralDamage(destTile, destTile.mapX, destTile.mapY)
+            
+            if(attacker.sprite.frame == 11 || attacker.sprite.frame == 17) {
+                destX = destTile.mapX
+                destY = destTile.mapY
+                //this.calculateCollateralDamage(destTile, destTile.mapX, destTile.mapY)
                 
             }
+            this.ws.send(JSON.stringify({action: "attack", orgX: attacker.mapX, orgY: attacker.mapY, destX: destX, destY: destY, frame:attacker.sprite.frame, faction:attacker.faction}))
 
         }
+        //new
+        this.clear()
     }
 
     calculateCollateralDamage(object, fromX, fromY) {
@@ -190,21 +217,29 @@ class Inspector {
  //       console.log("str: " + str.robot.description)
 //console.log("move")
         let robot = destTile.robot
+        let orgX = 0
+        let orgY = 0
+        let destX = 0
+        let destY = 0
         if (robot.battery - robot.moveCost >= 0) {
             for(let i=0; i<this.map.robots.length; i++) {
                 if (robot === this.map.robots[i]) {
                     //console.log("happy")
-                    this.map.robots[i].mapX = destTile.mapX
+                    orgX = this.map.robots[i].mapX
+                    orgY = this.map.robots[i].mapY
+                    destX = destTile.mapX
+                    destY = destTile.mapY
+/*                    this.map.robots[i].mapX = destTile.mapX
                     this.map.robots[i].mapY = destTile.mapY
                     this.map.robots[i].sprite.x = destTile.x
                     this.map.robots[i].sprite.y = destTile.y
                     this.map.robots[i].battery -= robot.moveCost
-
+                    */
                 }
             }
 
 
-            if(robot.canClaim) {
+            if(false && robot.canClaim) {
                 for(let i=0; i<this.map.robots.length; i++) {
                    
                     if (!this.map.robots[i].dead && (this.map.robots[i].sprite.frame == 5 || this.map.robots[i].sprite.frame == 6 || this.map.robots[i].sprite.frame == 12)
@@ -220,9 +255,11 @@ class Inspector {
                 }
             }
 
-            this.inspect(robot)
 
         }
+        this.ws.send(JSON.stringify({action: "move", orgX: orgX, orgY: orgY, destX: destX, destY: destY}))
+        
+        this.clear()
 
     }
     update(object) {
@@ -269,7 +306,7 @@ class Inspector {
                         this.buildCost[i].visible = true
                     }
                     else {
-                        this.builds[i].visible = false
+                        this.builds[i].visible = false 
                         this.buildCost[i].visible = false
                     }
                 }
@@ -299,7 +336,12 @@ class Inspector {
                     this.buildCost[i].visible = false
                 }
             }
-    
+            while(moveHighlightNo<12) {
+                this.moveHighlights[moveHighlightNo].visible = false
+                moveHighlightNo+=1
+            }
+            moveHighlightNo = 0
+
         }
         this.halo.x = object.sprite.x
         this.halo.y = object.sprite.y
@@ -372,7 +414,7 @@ class Inspector {
             maxX = object.range
             maxY = object.range
             if(this.sprite.frame == 5 || this.sprite.frame == 6 || this.sprite.frame == 12 
-                || object.faction != this.game.currentPlayer || object.battery == 0 || object.attackCost < object.battery) {
+                || object.faction != this.game.currentPlayer || object.battery == 0 || object.attackCost > object.battery) {
                 maxX=minX
                 maxY=minY
             }

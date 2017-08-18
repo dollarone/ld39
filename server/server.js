@@ -11,165 +11,175 @@ let start_y = 2
 
 let next_player_id = 0
 
+let factions = [2]
+factions[0] = "Big E Corporate"
+factions[1] = "Blue Sun"
 
-// TODO: multiple
-let parsedJSON = require('../client/static/assets/tilemaps/map0.json')
-
-let height = parsedJSON.height
-let width = parsedJSON.width
+blockerTiles = [0, 3, 7,8,9,10,11, 13,14,15,16,17, 38,39,40,41,42,43,44, 53, 68,69,70,71,72,73,74, 83]
 
 
 let map = []
-map[0] = {}
-map[0]["map"] = []
-map[0]["robots"] = []
 
-console.log(parsedJSON)
-let x = 0
-let y = 0
-for (let tile in parsedJSON.layers[0].data) {
-    //console.log("tile:" + tile)
-    //if (parsedJSON.layers[0].data[tile] >= 0) {
-        //let sprite = this.game.add.sprite(startX + offset + x*32, startY + y*24, 'tiles')
-        //sprite.frame = parsedJSON.layers[0].data[tile] - 1
-        if (undefined == map[0]["map"][y]) {
-            map[0]["map"][y] = [height]
-        }
-        if (undefined == map[0]["map"][y][x]) {
-            map[0]["map"][y][x] = [width]
-        }
-        map[0]["map"][y][x] = parsedJSON.layers[0].data[tile] - 1
-        //console.log("hey: " + x + "," + y + " : " + map[0]["map"][y][x])
-    //}
+for(let i=0; i<4; i++) {
+    let parsedJSON = require('../client/static/assets/tilemaps/map' + i + '.json')
 
-    x+=1
-    if (x%width == 0) {
-        y+=1
-        x=0
+    let height = parsedJSON.height
+    let width = parsedJSON.width
+
+
+    map[i] = {}
+    map[i]["map"] = []
+    map[i]["robots"] = []
+
+    console.log(parsedJSON)
+    let x = 0
+    let y = 0
+    for (let tile in parsedJSON.layers[0].data) {
+        //console.log("tile:" + tile)
+        //if (parsedJSON.layers[0].data[tile] >= 0) {
+            //let sprite = this.game.add.sprite(startX + offset + x*32, startY + y*24, 'tiles')
+            //sprite.frame = parsedJSON.layers[0].data[tile] - 1
+            if (undefined == map[i]["map"][y]) {
+                map[i]["map"][y] = [height]
+            }
+            if (undefined == map[i]["map"][y][x]) {
+                map[i]["map"][y][x] = [width]
+            }
+            map[i]["map"][y][x] = parsedJSON.layers[0].data[tile] - 1
+            //console.log("hey: " + x + "," + y + " : " + map[0]["map"][y][x])
+        //}
+
+        x+=1
+        if (x%width == 0) {
+            y+=1
+            x=0
+        }
+        
     }
-    
+
+    let buffer = ""
+    for (let y=0; y<height; y++) {
+        for (let x=0; x<width; x++) {
+            if (map[i]["map"][y][x].toString().length < 2) {
+                buffer += " "
+            }
+            buffer += map[i]["map"][y][x] + ", "
+        }
+        buffer += "\n"
+    }
+    console.log("loaded map:" + i + "\n" + buffer)
+
+
+    x = 0
+    y = 0
+    for (let tile in parsedJSON.layers[1].data) {
+    //        if (undefined == map[0]["robots"][y]) {
+    //            map[0]["robots"][y] = [height]
+    //        }
+    //        if (undefined == map[0]["robots"][y][x]) {
+    //            map[0]["robots"][y][x] = [width]
+    //        }
+        let batt = 6
+        let canClaim = false
+        let frame = parsedJSON.layers[1].data[tile] - 1
+        let attackCost = 4
+        let attack = 0
+        let defence = 0
+        let faction = "Neutral"
+        if (frame >= 12) {
+            faction = factions[1]
+        }
+        else {
+             faction = factions[0]
+        }
+
+        if (frame == 7 || frame == 13) {
+            batt = 4
+            attackCost = 0
+            attack = 2
+            defence = 1
+        }
+        else if (frame == 8 || frame == 14) {
+            batt = 3
+            canClaim = true
+            attackCost = 1
+            attack = 1
+            defence = 1
+        }
+        else if (frame == 9 || frame == 15) {
+            batt = 7
+            attackCost = 4
+            defence = 1
+            attack = 5
+            defence = 8
+        }
+        else if (frame == 10 || frame == 16) {
+            batt = 7
+            canClaim = true
+            attackCost = 1
+            attack = 2
+            defence = 5
+        }
+        else if (frame == 11 || frame == 17) {
+            batt = 6
+            attackCost = 3
+            attack = 2
+            defence = 5
+        }
+        let maxBatt = batt
+        if (frame == 6 || frame == 12) {
+            batt = 1
+            attackCost = 0
+            maxBatt = 10
+        }
+        else if (frame == 5) {
+            batt = 0
+            attackCost = 0
+            faction = "Neutral"
+            maxBatt = 5
+        }
+
+        
+
+        if (parsedJSON.layers[1].data[tile] > 0) {
+           map[i]["robots"].push( {y:y, x:x, frame:frame, battery:batt, maxBattery:maxBatt, moveCost:1, canClaim:canClaim, dead:false, attackCost:attackCost, attack:attack, defence:defence, faction:faction} )
+        }
+
+        x+=1
+        if (x%width == 0) {
+            y+=1
+            x=0
+        }
+
+            //console.log("hey: " + x + "," + y + " : " + map[0]["map"][y][x])
+
+    }
 }
 
-let buffer = ""
-for (let y=0; y<height; y++) {
-    for (let x=0; x<width; x++) {
-        if (map[0]["map"][y][x].toString().length < 2) {
-            buffer += " "
-        }
-        buffer += map[0]["map"][y][x] + ", "
-    }
-    buffer += "\n"
-}
-console.log("loaded map:\n" + buffer)
-
-x = 0
-y = 0
-for (let tile in parsedJSON.layers[1].data) {
-//        if (undefined == map[0]["robots"][y]) {
-//            map[0]["robots"][y] = [height]
-//        }
-//        if (undefined == map[0]["robots"][y][x]) {
-//            map[0]["robots"][y][x] = [width]
-//        }
-    if (parsedJSON.layers[1].data[tile] > 0) {
-       map[0]["robots"].push( {y:y, x:x, frame:parsedJSON.layers[1].data[tile] - 1} )
-    }
-
-    x+=1
-    if (x%width == 0) {
-        y+=1
-        x=0
-    }
-
-        //console.log("hey: " + x + "," + y + " : " + map[0]["map"][y][x])
-    //}
-
-}
-/*
-buffer = ""
-for (let y=0; y<height; y++) {
-    for (let x=0; x<width; x++) {
-        if (map[0]["robots"][y][x].toString().length < 2) {
-            buffer += " "
-        }
-        buffer += map[0]["robots"][y][x] + ", "
-    }
-    buffer += "\n"
-}
-console.log("loaded robots:\n" + buffer)
-*/
 let turn = 0
 
-/*
-for(var y=0; y < height; y++) {
-    map[y] = [height]
-        for(var x=0; x < width; x++) {
-        map[y][x] = parsedJSON.layers[1].data[z];
-        //console.log(parsedJSON[z]);
-        z++;
-
-    }
-}
-
-
-var robots = [];
-
-for (robot in parsedJSON.layers[2].objects) {
-    console.log(parsedJSON.layers[2].objects[robot]);
-    var type = parsedJSON.layers[2].objects[item].properties.type;
-    var x = parseInt(parsedJSON.layers[2].objects[item].x/32);
-    var y = parseInt(parsedJSON.layers[2].objects[item].y/32);
-    for (item in items) {
-        if (items[item].type == type) {
-            items[item].x = x;
-            items[item].y = y;
-        }
-    }
-}
-
-for (item in items) {
-    console.log(items[item].type + ": " + items[item].x + "/" + items[item].y);
-}
-
-
-var buffer = "";
-for(var y=0; y < height; y++) {
-  for(var x=0; x < width; x++) {
-    if (map[y][x] < 10) {
-        buffer += " ";
-    }
-    if (map[y][x] == 0) {
-        buffer += " , ";
-    }
-    else {
-        buffer += map[y][x] + ", ";
-    }
-  }
-  buffer += "\n"
-}
-
-console.log(buffer);
-/*
-{ "height":20,
- "layers":[
-        {
-         "data"
-*/
-let users = {}
+let staticUsers = {}
 let games = {}
-let gameNumber = 0
+let staticGameNumber = -1
 let earliestOnGoingGame = 0
+
+let waiting = {}
+for (let y=0; y<4; y++) {
+    waiting[y] = {}
+    waiting[y]["user"] = null
+    waiting[y]["ws"] = null
+}
 
 wss.on('connection', function(ws) {
 console.log(ws)
     console.log('connected: ' + ws.upgradeReq.headers['sec-websocket-key'])
     var user = ws.upgradeReq.headers['sec-websocket-key']
 //    console.log('connected: ' + ws.upgradeReq.headers['sec-websocket-key']);
-    if (user in users) {
+    if (user in staticUsers) {
         console.log("user already registered?")
     }
     else {
-        users[user] = {}
+        staticUsers[user] = {}
 
         let payload = new Object()
         payload["status"] = "registered"
@@ -177,116 +187,720 @@ console.log(ws)
         ws.send(JSON.stringify(payload))
     }
 
+    let usersGameNumber = 0
+
     ws.on('message', function(message) {       
-        let incomingMsg = JSON.parse(message);
-        if (user in users) {
+        let incomingMsg = JSON.parse(message)
+
+        if (usersGameNumber == -1) {
+            usersGameNumber = ws.gameNumber
+            console.log("it worked! setting " + usersGameNumber + " to " + ws.gameNumber)
+        }
+        if (user in staticUsers) {
             
             //players[users[user]].action = incomingMsg.action;
             //console.log("action from #" + users[user] + " " + players[users[user]].nick + ": " + incomingMsg.action);
-            console.log("action from #" + users[user] + " (current nick: " + users[user].nick + ") " + ": " + incomingMsg.action + " [" + incomingMsg.nick + "]")
+            console.log("action from #" + user + " (current nick: " + staticUsers[user].nick + ") " + ": " + incomingMsg.action + " [" + incomingMsg.gameType + "]")
             for ( a in incomingMsg) { console.log(a + ": " + incomingMsg[a])}
 
             if (incomingMsg.action == "setNick") {
                 if (incomingMsg.nick == null || incomingMsg.nick == undefined || incomingMsg.nick == "" || incomingMsg["nick"] == undefined) {
-                    if (users[user] != undefined && (users[user].nick == null || users[user].nick == undefined || users[user].nick == "" || users[user]["nick"] == undefined)) {
-                        users[user].nick = "Dr. Rust"
+                    if (staticUsers[user] != undefined && (staticUsers[user].nick == null || staticUsers[user].nick == undefined || staticUsers[user].nick == "" || staticUsers[user]["nick"] == undefined)) {
+                        staticUsers[user].nick = "Dr. Rust"
                     }
                 }
                 else {
-                    users[user].nick = incomingMsg.nick
+                    staticUsers[user].nick = incomingMsg.nick
                 }
 
-                console.log(user + " setNick to : " + users[user].nick)
+                console.log(user + " setNick to : " + staticUsers[user].nick)
 
                 let payload = new Object();
                 payload["status"] = "nickChanged";
-                payload["nick"] = users[user].nick
+                payload["nick"] = staticUsers[user].nick
                 ws.send(JSON.stringify(payload));
             }
             else if (incomingMsg.action == "findGame") {
-                if (incomingMsg.gameType == "local") {
-                    let usersInGame = [2]
-                    usersInGame[0] = user
-                    usersInGame[1] = user
-                    startNewGame(ws, usersInGame, "local", 0)
+                if (incomingMsg.gameType == "online") {
+                    if (waiting[incomingMsg.level]["user"] == null) {
+                        //wait
+                        waiting[incomingMsg.level]["user"] = user
+                        waiting[incomingMsg.level]["ws"] = ws
+
+                        usersGameNumber = -1
+
+                        let payload = new Object()
+                        payload["status"] = "waitingForGame"
+                        console.log("waiting for game: " + user + " on level " + incomingMsg.level)
+                        ws.send(JSON.stringify(payload))
+                    }
+                    else {
+                        let usersInGame = [2]
+                        usersInGame[0] = waiting[incomingMsg.level]["user"]
+                        usersInGame[1] = user
+                        waiting[incomingMsg.level]["user"] = null
+                        let usersWs = [2]
+                        usersWs[0] = waiting[incomingMsg.level]["ws"]
+                        usersWs[1] = ws
+
+                        waiting[incomingMsg.level]["ws"] = null
+                        usersGameNumber = startNewGame(usersWs, usersInGame, incomingMsg.gameType, incomingMsg.level)
+                        usersWs[0].gameNumber = usersGameNumber
+                    }
                 }
                 // if another findGame, join and send Start
                 // type: local = just start immediately, assume client will send both p1 and p2 (>2?)
                 // ,ai,
                 // ,online
                 // also provide map (or random)
+                else if (incomingMsg.gameType == "local") {
+                    let usersInGame = [2]
+                    usersInGame[0] = user
+                    usersInGame[1] = user
+                    let usersWs = [2]
+                    usersWs[0] = ws
+                    usersWs[1] = ws
+                    usersGameNumber = startNewGame(usersWs, usersInGame, incomingMsg.gameType, incomingMsg.level)
+                }
 
+            }
+            else if (incomingMsg.action == "endTurn") {
+                for(let i=0; i<games[usersGameNumber]["playerCount"]; i++) {
+                    let userString = games[usersGameNumber]["players"][i]["user"]
+                    if (userString == user && games[usersGameNumber]["currentPlayer"] == i) {
+                        console.log(user + " ending turn in game " + usersGameNumber)
+                        endTurn(incomingMsg, usersGameNumber)
+                        break // because local multiplayer
+                    }
+                }
+            }
+            else if (incomingMsg.action == "move") {
+                console.log(user + " moving in game  " + usersGameNumber + " currentplayer is " + games[usersGameNumber]["currentPlayer"])
+                for(let i=0; i<games[usersGameNumber]["playerCount"]; i++) {
+                    let userString = games[usersGameNumber]["players"][i]["user"]
+                    if (userString == user && games[usersGameNumber]["currentPlayer"] == i) {
+                        console.log(user + " playing " + usersGameNumber)
+                        move(incomingMsg, usersGameNumber)
+                        break // because local multiplayer
+                    }
+                    else {
+                        console.log(user + " fail " + userString)
+                    }
+                }
+
+
+            }
+            else if (incomingMsg.action == "buildRobot") {
+                console.log(user + " building robot in game  " + usersGameNumber + " currentplayer is " + games[usersGameNumber]["currentPlayer"])
+                for(let i=0; i<games[usersGameNumber]["playerCount"]; i++) {
+                    let userString = games[usersGameNumber]["players"][i]["user"]
+                    if (userString == user && games[usersGameNumber]["currentPlayer"] == i) {
+                        console.log(user + " building " + usersGameNumber)
+                        buildRobot(incomingMsg, usersGameNumber)
+                    }
+                }
+                
+            }
+            else if (incomingMsg.action == "attack") {
+                console.log(user + " attacking in game  " + usersGameNumber + " currentplayer is " + games[usersGameNumber]["currentPlayer"])
+                for(let i=0; i<games[usersGameNumber]["playerCount"]; i++) {
+                    let userString = games[usersGameNumber]["players"][i]["user"]
+                    if (userString == user && games[usersGameNumber]["currentPlayer"] == i) {
+                        console.log(user + " attack " + usersGameNumber)
+                        attack(incomingMsg, usersGameNumber)
+                    }
+                }
+                
+            }
+            else if (incomingMsg.action == "resign") {
+                console.log(user + " resigning in game  " + usersGameNumber + " currentplayer is " + games[usersGameNumber]["currentPlayer"])
+                for(let i=0; i<games[usersGameNumber]["playerCount"]; i++) {
+                    let userString = games[usersGameNumber]["players"][i]["user"]
+                    if (userString == user && games[usersGameNumber]["currentPlayer"] == i) {
+                        resign(incomingMsg, usersGameNumber)
+                        
+                    }
+                }
+            }
+            else {
+                console.log("action from unknown user (" + user + "): " + incomingMsg.action)
             }
 
         }
+        
+    })
+})
+
+//             this.ws.send(JSON.stringify({action: "attack", orgX: attacker.mapX, orgY: attacker.mapY, destX: target, destY: destY, frame:attacker.sprite.frame}))
+
+function resign(incomingMsg, gameNumber) {
+
+    games[gameNumber]["onGoing"] = false
+    let returnStatus = "gameOver"
+    let sentUsers = {}
+    let users = games[gameNumber]["players"]
+    for (let user=0; user<users.length; user++) {
+        let userString = games[gameNumber]["players"][user]["user"]
+        let payload = new Object()
+        payload["status"] = returnStatus
+        payload["loser"] = games[gameNumber]["currentPlayer"]
+        console.log("in attack loop " + user + " /" + userString )
+
+        if (sentUsers[userString] != undefined) {
+        }
         else {
-            console.log("action from unknown user (" + user + "): " + incomingMsg.action)
+            games[gameNumber]["players"][user]["ws"].send(JSON.stringify(payload))
+            sentUsers[userString] = true
+            console.log( "sending " + payload["status"] + " to " + userString)
+            console.log(JSON.stringify(sentUsers))
+            delete staticUsers[userString]
         }
+    }    
+}
 
-        
-        
-    });
-});
+function attack(incomingMsg, gameNumber) {
+    let sentUsers = {}
+
+    let returnStatus = "attackFAIL"
+
+    let robots = games[gameNumber]["robots"]
+    let newX = 0
+    let newY = 0
+    let newBattery = 0
+    console.log("robots size " + robots.length)
+
+    for(let i=0; i<robots.length; i++) {
+        console.log("looking for attacker " + robots[i].x + "," + robots[i].y + " (frame " + robots[i].frame + ")")
+        if(!robots[i].dead && robots[i].x == incomingMsg.orgX && robots[i].y == incomingMsg.orgY && robots[i].battery >= robots[i].attackCost
+            && robots[i].frame != 5 && robots[i].frame != 6 && robots[i].frame != 12) {
+            
+            console.log("found attacker " + robots[i].x + "/" + robots[i].y)
+            for(let j=0; j<robots.length; j++) {
+                console.log("looking for target at  " + incomingMsg.destX + "/" + incomingMsg.destY + ": " + robots[j].x + "," + robots[j].y + " (frame " + robots[i].frame + ")")
+                if(!robots[j].dead && robots[j].x == incomingMsg.destX && robots[j].y == incomingMsg.destY && (j != i || robots[i].frame == 7 || robots[i].frame == 13)
+                    && robots[j].frame != 5 && robots[j].frame != 6 && robots[j].frame != 12) {
+                    console.log("found target " + robots[j].x + "/" + robots[j].y)
+                    robots[i].battery -= robots[i].attackCost
+                    robots[j].defence -= robots[i].attack
+                    if (robots[j].defence < 1) {
+                        robots[j].dead = true
+                    }
+                    returnStatus = "attackOK"
+                    checkWin(gameNumber)
+                    break
+                }
+            }
+            if(robots[i].frame == 11 || robots[i].frame == 17) {
+                returnStatus = "attackOK"
+                robots[i].battery -= robots[i].attackCost
+            }
 
 
-function startNewGame(ws, users, gameType, mapNum) {
-    games[gameNumber] = {}
-    games[gameNumber]["gameNumber"] = gameNumber
-    games[gameNumber]["playerCount"] = users.length
-    games[gameNumber]["players"] = [users.length]
-    games[gameNumber]["currentPlayer"] = getRandomInt(0, users.length)
-    games[gameNumber]["mapNum"] = mapNum
+            // collateral damage?
+            if (robots[i].frame == 7 || robots[i].frame == 13 || robots[i].frame == 11 || robots[i].frame == 17) {
+                console.log("boom")
+                /*
+  found target 2/3
+boom
+x/y:-1/-1
+x/y:-1/0
+x/y:-1/1
+x/y:0/-1
+x/y:0/1
+x/y:1/0
+in attack loop 0 /CS914c0vt+hjlBtaeMhceQ==
+            
+                */
+                calculateCollateralDamage(incomingMsg, gameNumber, robots[i])
+                checkWin(gameNumber)
 
-    console.log( users.length + " users : " + JSON.stringify(users) + " , " + gameType + ", map: " + mapNum)
-
-    for (let x=0; x<users.length; x++) {
-        games[gameNumber]["players"][x] = {}
-        games[gameNumber]["players"][x]["user"] = users[x]
-        games[gameNumber]["players"][x]["batteryBonus"] = 0
-        if (users[x] != games[gameNumber]["nextPlayer"]) {
-            games[gameNumber]["players"][x]["batteryBonus"] = 1
+            }
+            break
+            
         }
-        
     }
 
-    //add faction randomly, for now assume:
-    //users[0] = "Blue Sun"
-    //users[1] = "Big E Corporate"
+    //games[usersGameNumber]["players"][i]["user"]
+    let users = games[gameNumber]["players"]
+    for (let user=0; user<users.length; user++) {
+        let userString = games[gameNumber]["players"][user]["user"]
+        let payload = new Object()
+        payload["status"] = returnStatus
+        payload["robots"] = robots
+        payload["currentPlayer"] = games[gameNumber]["currentPlayer"]
+        console.log("in attack loop " + user + " /" + userString )
 
-/*    game[gameNumber]["player1"] = user[0]
-    if (users.length > 1) {
-        game[gameNumber]["player2"] = user[1]
+        if (sentUsers[userString] != undefined) {
+        }
+        else {
+            games[gameNumber]["players"][user]["ws"].send(JSON.stringify(payload))
+            sentUsers[userString] = true
+            console.log( "sending " + payload["status"] + " to " + userString)
+            console.log(JSON.stringify(sentUsers))
+        }
+    }    
+}
+
+function calculateCollateralDamage(incomingMsg, gameNumber, attacker) {
+    let colOffset = 1
+    if (incomingMsg.destY%2==0) {
+        colOffset = 0
     }
-    if (users.length > 2) {
-        game[gameNumber]["player3"] = user[2]
+    let rowOffset = 0
+    let minX = -1
+    let minY = -1
+    let maxX = 1
+    let maxY = 1
+
+    let robots = games[gameNumber]["robots"]
+    let validAttack = true
+
+    for (let x=minX; x<=maxX; x++) {
+        for (let y=minY; y<=maxY; y++) {
+            if(x==0 && y==0 || x==maxX && y==minY || x==maxX && y==maxY || x==maxX && y!=0) {
+            }
+            else {
+                if (incomingMsg.destY%2==0) {
+                    rowOffset = 0
+                }
+                else if(y==0) {
+                    rowOffset = -1
+                }
+                else {
+                    rowOffset = 0
+                }
+                console.log("x/y:" + x + "/" + y)
+                //oops forgot it checks faction. HACK: "foo"
+                if (canTarget(incomingMsg.destX + x + colOffset  + rowOffset , incomingMsg.destY + y, "foo", attacker.frame, gameNumber)) {
+                    let collateral = getTarget(incomingMsg.destX + x + colOffset  + rowOffset , incomingMsg.destY + y, "foo", attacker.frame, gameNumber)
+                    if (collateral != null) {
+                        console.log("found collateral " + collateral.frame)
+                        for (let i=0; i<robots.length; i++) {
+                            if (collateral == robots[i]) {
+                                console.log("damaging " + collateral.frame)
+                                collateral.defence -= attacker.attack
+                            }
+                        }
+                        //collateral.defence -= attacker.attack
+                        if (collateral.defence < 1) {
+                            collateral.dead = true
+                        }
+
+                    }
+                }
+            }
+        }
+    }            
+    return validAttack
+
+}
+function canMove(x, y) {
+    if( x < 0 || x >= this.width || y < 0 || y >= this.height ) {
+        return false
     }
-    if (users.length > 3) {
-        game[gameNumber]["player4"] = user[3]
-    }
-    */
-    games[gameNumber]["gameType"] = gameType
-    games[gameNumber]["turn"] = 0
-    games[gameNumber]["map"] = map[0]["map"]
-    games[gameNumber]["robots"] = map[0]["robots"]
-    games[gameNumber]["onGoing"] = true
-console.log( "robots: " + JSON.stringify(games[gameNumber]["robots"]))
+
+    //console.log("looking for " + x + "/" + y)
+    //console.log("found " + this.map["map"][y][x])
+    let mapTile = this.map["map"][y][x]
+    //let robotsTile = this.map["robots"][y][x]
     
 
-    let sentUsers = {}
-    for (user in users) {
-        let payload = new Object();
-        payload["status"] = "gameStarted"
-        payload["robots"] = games[gameNumber]["robots"]
-        payload["playerCount"] = games[gameNumber]["playerCount"]
-        payload["currentPlayer"] = games[gameNumber]["currentPlayer"]
-        payload["mapNum"] = games[gameNumber]["mapNum"]
-        // also send batterybonus
+    if (mapTile != -1 && this.blockerTiles.indexOf(mapTile) == -1) {
+        for(let i=0; i<this.robots.length; i++) {
+            if (this.robots[i].dead==false && this.robots[i].mapX == x && this.robots[i].mapY == y
+                && this.robots[i].sprite.frame != 5 && this.robots[i].sprite.frame != 6 && this.robots[i].sprite.frame != 12) {
+                return false
+            }
+        }
+        return true
+    }
+    return false
+}
 
-        if (sentUsers[users[user]] != undefined) {
+function canTarget(x, y, faction, robotType, gameNumber) {
+
+    let robots = games[gameNumber]["robots"]
+
+    if( x < 0 || x >= this.width || y < 0 || y >= this.height ) {
+        return false
+    }
+    let mapTile = games[gameNumber]["map"][y][x] //this.map["map"][y][x]
+    if (mapTile == -1) {
+        return false
+    }
+    if (robotType == 11 || robotType == 17) {
+        return true
+    }
+
+
+    if (blockerTiles.indexOf(mapTile) == -1) {
+        for(let i=0; i<robots.length; i++) {
+           
+            if (robots[i].dead==false && robots[i].frame != 5 && robots[i].frame != 6 && robots[i].frame != 12 
+                && robots[i].x == x && robots[i].y == y && (robotType === 11 || robotType === 17 || robots[i].faction != faction) ) {
+                return true
+            }
+        }
+    }
+    return false
+}
+function getTarget(x, y, faction, robotType, gameNumber) {
+
+    let robots = games[gameNumber]["robots"]
+    let mapTile = games[gameNumber]["map"][y][x]
+
+    if (blockerTiles.indexOf(mapTile) == -1) {
+        for(let i=0; i<robots.length; i++) {
+           // console.log("ro" + robotType)
+            if (robots[i].dead==false && robots[i].frame != 5 && robots[i].frame != 6 && robots[i].frame != 12 
+                && robots[i].x == x && robots[i].y == y && (robotType === 11 || robotType === 17 || robots[i].faction != faction) ) {
+                return robots[i]
+            }
+        }
+    }
+    return null
+}
+
+
+function checkWin(gameNumber) {
+    /*
+    recall: 
+
+this.players[0] = "Big E Corporate"
+this.players[1] = "Blue Sun"        
+        */
+    let p0HasUnit = false
+    let p0HasFactory = false        
+    let p1HasUnit = false
+    let p1HasFactory = false        
+
+    let robots = games[gameNumber]["robots"]
+    //let cur = games[staticGameNumber]["currentPlayer"]
+
+    for(let i=0; i<robots.length; i++) {
+
+        if(robots[i].dead == false)  {
+            if(robots[i].frame == 6 || robots[i].frame == 12) {
+                if(robots[i].faction == factions[0]) {
+                    p0HasFactory = true
+                    console.log("1")
+                }
+                else if(robots[i].faction == factions[1]) {
+                    p1HasFactory = true
+                    console.log("2")
+                }
+            }
+            else {
+                if(robots[i].faction == factions[0]) {
+                    p0HasUnit = true
+                    console.log("3")
+                }
+                else if(robots[i].faction == factions[1]) {
+                    p1HasUnit = true
+                    console.log("4")
+                }
+            }
+        }
+    
+    }
+    console.log("grasttest1")
+    if (!p0HasUnit && !p0HasFactory) {
+        console.log("grast1")
+        announceWin(gameNumber, 1)
+    }
+    else if (!p1HasUnit && !p1HasFactory) {
+        console.log("grast0")
+        announceWin(gameNumber, 0)
+    }
+
+}
+
+function announceWin(gameNumber, pl) {
+
+    games[gameNumber]["onGoing"] = false
+    let returnStatus = "gameOver"
+    let sentUsers = {}
+    let users = games[gameNumber]["players"]
+    for (let user=0; user<users.length; user++) {
+        let userString = games[gameNumber]["players"][user]["user"]
+        let payload = new Object()
+        payload["status"] = returnStatus
+        payload["loser"] = pl
+        console.log("in attack loop " + user + " /" + userString )
+
+        if (sentUsers[userString] != undefined) {
         }
         else {
-            ws.send(JSON.stringify(payload))
-            sentUsers[users[user]] = true
+            games[gameNumber]["players"][user]["ws"].send(JSON.stringify(payload))
+            sentUsers[userString] = true
+            console.log( "sending " + payload["status"] + " to " + userString)
+            console.log(JSON.stringify(sentUsers))
+            delete staticUsers[userString]
+        }
+    }    
+
+}
+
+function move(incomingMsg, gameNumber) {
+    let sentUsers = {}
+
+    let returnStatus = "moveFAIL"
+
+    let robots = games[gameNumber]["robots"]
+    let newX = 0
+    let newY = 0
+    let newBattery = 0
+
+    for(let i=0; i<robots.length; i++) {
+        console.log("is it " + robots[i].x + "," + robots[i].y + " (frame " + robots[i].frame + ")")
+        if(!robots[i].dead && robots[i].x == incomingMsg.orgX && robots[i].y == incomingMsg.orgY && robots[i].battery >= robots[i].moveCost
+            && robots[i].frame != 5 && robots[i].frame != 6 && robots[i].frame != 12) {
+            // TODO: actually check
+        console.log("yes " + robots[i].x + "/" + robots[i].y)
+            robots[i].x = incomingMsg.destX
+            robots[i].y = incomingMsg.destY
+            newX = robots[i].x
+            newY = robots[i].y
+            robots[i].battery -= robots[i].moveCost
+            newBattery = robots[i].battery
+            if (robots[i].canClaim) {
+                for(let j=0; j<robots.length; j++) {
+                    console.log("is it " + robots[j].x + "," + robots[j].y)
+                    if(!robots[j].dead && robots[j].x == incomingMsg.destX && robots[j].y == incomingMsg.destY
+                      && (robots[j].frame == 5 || robots[j].frame == 6 || robots[j].frame == 12)) {
+                        if (games[gameNumber]["currentPlayer"]==0) {
+                            robots[j].frame = 12
+                            robots[j].faction = factions[1]
+                        }
+                        else {
+                            robots[j].frame = 6
+                            robots[j].faction = factions[0]
+                        }
+                        checkWin(gameNumber)
+
+                    }
+                }
+            }
+
+            returnStatus = "moveOK"
+        }
+    }
+    //games[usersGameNumber]["players"][i]["user"]
+    let users = games[gameNumber]["players"]
+    for (let user=0; user<users.length; user++) {
+        let userString = games[gameNumber]["players"][user]["user"]
+        let payload = new Object()
+        payload["status"] = returnStatus
+        payload["robots"] = robots
+        payload["currentPlayer"] = games[gameNumber]["currentPlayer"]
+        console.log("in loop " + user + " /" + userString )
+
+        if (sentUsers[userString] != undefined) {
+        }
+        else {
+            games[gameNumber]["players"][user]["ws"].send(JSON.stringify(payload))
+            sentUsers[userString] = true
+            console.log( "sending " + payload["status"] + " to " + userString)
+            console.log(JSON.stringify(sentUsers))
+        }
+    }
+}
+
+function buildRobot(incomingMsg, gameNumber) {
+//6 uis blue
+    let robot = null
+    let robots = games[gameNumber]["robots"]
+    let returnStatus = "robotBuildFail"
+    for(let i=0; i<robots.length; i++) {
+        if(!robots[i].dead && robots[i].x == incomingMsg.mapX && robots[i].y == incomingMsg.mapY
+            && ((robots[i].frame == 6 && games[gameNumber]["currentPlayer"] == 1 ) || 
+                (robots[i].frame == 12 && games[gameNumber]["currentPlayer"] == 0))) {
+            robot = robots[i]
+        returnStatus = "foundRobot"
+        }
+    }
+
+    // find battery cost based on frame
+    let frame = incomingMsg.frame
+    let unitCost = 4
+
+    let batt = 6
+    let canClaim = false
+    let attackCost = 4
+    let attack = 0
+    let defence = 0
+    let faction = "Neutral"
+    if (frame >= 12) {
+        faction = factions[1]
+    }
+    else {
+         faction = factions[0]
+    }
+
+    if (frame == 5) {
+        batt = 0
+        attackCost = 0
+        faction = "Neutral"
+    }
+    else if (frame == 7 || frame == 13) {
+        batt = 4
+        attackCost = 0
+        attack = 2
+        defence = 1
+        unitCost = 1
+    }
+    else if (frame == 8 || frame == 14) {
+        batt = 3
+        canClaim = true
+        attackCost = 1
+        attack = 1
+        defence = 1
+        unitCost = 1
+    }
+    else if (frame == 9 || frame == 15) {
+        batt = 7
+        attackCost = 4
+        defence = 1
+        attack = 5
+        defence = 8
+        unitCost = 3
+    }
+    else if (frame == 10 || frame == 16) {
+        batt = 7
+        canClaim = true
+        attackCost = 1
+        attack = 2
+        defence = 5
+        unitCost = 3
+    }
+    else if (frame == 11 || frame == 17) {
+        batt = 6
+        attackCost = 3
+        attack = 2
+        defence = 5
+        unitCost = 4
+    }
+    else if (frame == 6 || frame == 12) {
+        batt = 1
+        attackCost = 0
+    }
+
+    // find available battery in the unit we're building in
+    // find robot, and use the server's data
+
+    if (robot != null && robot.battery >= unitCost) {
+        robot.battery -= unitCost
+        games[gameNumber]["robots"].push( {y:incomingMsg.mapY, x:incomingMsg.mapX, frame:frame, battery:batt, maxBattery:batt, moveCost:1, canClaim:canClaim, dead:false, attackCost:attackCost, attack:attack, defence:defence})
+        returnStatus = "robotBuildOK"
+    }
+               //map[i]["robots"].push( {y:y, x:x, frame:frame, battery:batt, maxBattery:batt, moveCost:1, canClaim:canClaim, dead:false, attackCost:attackCost, attack:attack, defence:defence} )
+    let sentUsers = {}
+    let users = games[gameNumber]["players"]
+    for (let user=0; user<users.length; user++) {
+        let userString = games[gameNumber]["players"][user]["user"]
+        let payload = new Object()
+        payload["status"] = returnStatus
+        payload["robots"] = robots
+        payload["frame"] = incomingMsg.frame
+        payload["mapX"] = incomingMsg.mapX
+        payload["mapY"] = incomingMsg.mapY
+        console.log("in loop " + user + " /" + userString )
+
+        if (sentUsers[userString] != undefined) {
+        }
+        else {
+            games[gameNumber]["players"][user]["ws"].send(JSON.stringify(payload))
+            sentUsers[userString] = true
+            console.log( "sending " + payload["status"] + " to " + userString)
+            console.log(JSON.stringify(sentUsers))
+        }
+    }
+
+}
+
+function endTurn(incomingMsg, gameNumber) {
+    let sentUsers = {}
+    let users = games[gameNumber]["players"]
+    
+    games[gameNumber]["currentPlayer"] = games[gameNumber]["currentPlayer"] +1//)% games[gameNumber]["playerCount"]
+    games[gameNumber]["currentPlayer"] = games[gameNumber]["currentPlayer"] % 2
+
+    let robots = games[gameNumber]["robots"]
+    for(let i=0; i<robots.length; i++) {
+        if(!robots[i].dead && robots[i].battery < robots[i].maxBattery && robots[i].frame != 5) { 
+            robots[i].battery = robots[i].battery + 1
+            
+        }
+    }
+
+    for (let user=0; user<users.length; user++) {
+        let userString = games[gameNumber]["players"][user]["user"]
+        let payload = new Object()
+        payload["status"] = "newTurn"
+        payload["robots"] = robots
+        payload["currentPlayer"] = games[gameNumber]["currentPlayer"]
+        payload["opponentNick"] = incomingMsg.nick
+        console.log("in loop " + user + " /" + users[user] )
+
+        if (sentUsers[userString] != undefined) {
+        }
+        else {
+            games[gameNumber]["players"][user]["ws"].send(JSON.stringify(payload))
+            sentUsers[userString] = true
+            console.log( "sending " + payload["status"] + " to " + userString)
+            console.log(JSON.stringify(sentUsers))
+        }
+    }
+
+}
+
+function startNewGame(ws, users, gameType, mapNum) {
+    staticGameNumber++
+    games[staticGameNumber] = {}
+    games[staticGameNumber]["gameNumber"] = staticGameNumber
+    games[staticGameNumber]["playerCount"] = users.length
+    games[staticGameNumber]["players"] = [users.length]
+    games[staticGameNumber]["currentPlayer"] = getRandomInt(0, users.length)
+    games[staticGameNumber]["mapNum"] = mapNum
+
+
+    //console.log( users.length + " users : " + JSON.stringify(users) + " , " + gameType + ", map: " + mapNum)
+
+    for (let x=0; x<users.length; x++) {
+        games[staticGameNumber]["players"][x] = {}
+        games[staticGameNumber]["players"][x]["user"] = users[x]
+        games[staticGameNumber]["players"][x]["ws"] = ws[x]
+        games[staticGameNumber]["players"][x]["batteryBonus"] = 0 // run through robots of this faction, give them bonus
+        if (users[x] != games[staticGameNumber]["nextPlayer"]) {
+            games[staticGameNumber]["players"][x]["batteryBonus"] = 1
+        }
+        
+    }
+
+    games[staticGameNumber]["gameType"] = gameType
+    games[staticGameNumber]["turn"] = 0
+    games[staticGameNumber]["map"] = JSON.parse(JSON.stringify(map[mapNum]["map"]))
+    games[staticGameNumber]["robots"] = JSON.parse(JSON.stringify(map[mapNum]["robots"]))
+    games[staticGameNumber]["onGoing"] = true  
+
+    let sentUsers = {}
+
+    for (let user=0; user<users.length; user++) {
+        let payload = new Object();
+        let userString = games[staticGameNumber]["players"][user]["user"]
+        payload["status"] = "gameStarted"
+        payload["robots"] = games[staticGameNumber]["robots"]
+        payload["playerCount"] = games[staticGameNumber]["playerCount"]
+        payload["currentPlayer"] = games[staticGameNumber]["currentPlayer"]
+        payload["playerNumber"] = user
+        payload["mapNum"] = games[staticGameNumber]["mapNum"]
+        // also send batterybonus
+//console.log("sending payload " + JSON.stringify(payload))
+        if (sentUsers[userString] != undefined) {
+        }
+        else {
+            games[staticGameNumber]["players"][user]["ws"].send(JSON.stringify(payload))
+            sentUsers[userString] = true
             console.log( "sending gameStarted to " + users[user] + " robots: " + payload["robots"])
             console.log(JSON.stringify(sentUsers))
         }
@@ -294,7 +908,7 @@ console.log( "robots: " + JSON.stringify(games[gameNumber]["robots"]))
     }
 
 
-    gameNumber++
+    return staticGameNumber
 
 }
 
@@ -328,145 +942,7 @@ function getDateTime() {
 }
 
 
-function attack(player) {
 
-    var x = player.x;
-    var y = player.y;
-    if (player.action == "left") {
-        x -= 1;
-    }
-    else if (player.action == "right") {
-        x += 1;
-    }
-    else if (player.action == "up") {
-        y -= 1;
-    }
-    else if (player.action == "down") {
-        y += 1;
-    }
-
-    for(var i = 0; i < players.length; i++) {
-        if (player.nick != players[i].nick && players[i].life > 0 && players[i].x == x && players[i].y == y) {
-            // yey
-            var bonus = 0;
-            var abort = false;
-            if (player.action == "left" && map[players[i].y][players[i].x-1] <= last_walkable_tile) {
-                for(var j = 0; j < players.length; j++) {
-                    if (players[i].nick != players[j].nick && players[i].x-1 == players[j].x && players[i].y == players[j].y) {
-                        abort = true;
-                        break;
-                    }
-                }
-                if (!abort) {
-                    players[i].x -= 1;
-                }
-            }
-            else if (player.action == "right" && map[players[i].y][players[i].x+1] <= last_walkable_tile) {
-                for(var j = 0; j < players.length; j++) {
-                    if (players[i].nick != players[j].nick && players[i].x+1 == players[j].x && players[i].y == players[j].y) {
-                        abort = true;
-                        break;
-                    }
-                }
-                if (!abort) {
-                    players[i].x += 1;
-                }
-            }
-            else if (player.action == "up" && map[players[i].y-1][players[i].x] <= last_walkable_tile) {
-                for(var j = 0; j < players.length; j++) {
-                    if (players[i].nick != players[j].nick && players[i].x == players[j].x && players[i].y-1 == players[j].y) {
-                        abort = true;
-                        break;
-                    }
-                }
-                if (!abort) {
-                    players[i].y -= 1;
-                }
-            }
-            else if (player.action == "down" && map[players[i].y+1][players[i].x] <= last_walkable_tile) {
-                for(var j = 0; j < players.length; j++) {
-                    if (players[i].nick != players[j].nick && players[i].x == players[j].x && players[i].y+1 == players[j].y) {
-                        abort = true;
-                        break;
-                    }
-                }
-                if (!abort) {
-                    players[i].y += 1;
-                }
-            }
-            else {
-                bonus = 2;
-            }
-
-            var defence = 0;
-            var armour = false;
-            var shield = false;
-            var helmet = false;
-
-            for (item in items) {
-                if (items[item].owner == players[i].nick) {
-                    if (items[item].type == "armour1" || items[item].type == "armour2") {
-                        armour = true;
-                    }
-                    else if (items[item].type == "helm1" || items[item].type == "helm2" || items[item].type == "helm3") {
-                        helmet = true;
-                    }
-                    else if (items[item].type == "shield1" || items[item].type == "shield2" 
-                        || items[item].type == "shield3" || items[item].type == "shield4") {
-                        shield = true;
-                    }
-                }
-                if (items[item].owner == player.nick && items[item].type == "sword") {
-                    bonus += 2;
-                }
-            }
-
-            if (armour) {
-                defence += 2;
-            }
-            if (shield) {
-                defence += 1;
-            }
-            if (helmet) {
-                defence += 1;
-            }
-
-            var payload = new Object();
-            
-        if (getRandomInt(1,11) + bonus - defence > 5) {
-                players[i].life -= 1;
-                
-                if (players[i].life == 0) {
-                    payload["status"] = "death";
-                }
-                else {
-                    payload["status"] = "hit";
-                }
-            }
-            else {
-                payload["status"] = "miss";
-
-            }
-            //console.log("sending " + payload.toString());
-
-            for(var j in wss.clients) {
-                var key = users[wss.clients[j].upgradeReq.headers['sec-websocket-key']];
-                if (key == i || players[key].nick == player.nick) {
-                    wss.clients[j].send(JSON.stringify(payload));
-                }
-            }
-
-
-            // kill confirmed
-            if (players[i].life == 0) {
-                dropItems(players[i], player.action, false);
-                players[i].x = -100;
-            }
-
-            return true;
-        }
-    }
-}
 function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -484,169 +960,3 @@ function distanceBetweenTwoPoints(a, b) {
 
     return Math.sqrt(xs + ys);
 }
-
-function process_and_send_events() {
-    turn++;
-    //console.log("Turn " + turn);
-    for (let i=earliestOnGoingGame; i<gameNumber; i++) {
-        if (games[i]["onGoing"] != undefined && games[i]["onGoing"] == true) {
-         //   console.log("active game: " + games[i]["gameNumber"])
-        }
-    }
-    for(var i = 0; i < players.length; i++) {
-
-        if (players[i].bot == true) {
-            for(var j = 0; j < players.length; j++) {
-                
-                if (i != j && distanceBetweenTwoPoints(players[i], players[j]) <= 5) {
-                    var choice = getRandomInt(1,13);
-                    if (choice < 5) {
-                        if (players[i].x < players[j].x) {
-                            players[i].action = "right";
-                        }
-                        else if (players[i].x > players[j].x) {
-                            players[i].action = "left";
-                        }
-                        else {
-                            if (players[i].y > players[j].y) {
-                                players[i].action = "up";
-                            }
-                            else if (players[i].y < players[j].y) {
-                                players[i].action = "down";
-                            }
-                        }
-                    }
-                    else if (choice > 7) {
-                        if (players[i].y > players[j].y) {
-                            players[i].action = "up";
-                        }
-                        else if (players[i].y < players[j].y) {
-                            players[i].action = "down";
-                        }
-                        else {
-                            if (players[i].x < players[j].x) {
-                                players[i].action = "right";
-                            }
-                            else if (players[i].x > players[j].x) {
-                                players[i].action = "left";
-                            }
-                        }
-                    }
-                    else {
-                        var choice = getRandomInt(1,8);
-                        switch (choice) {
-                            case 1: players[i].action = "left"; break;
-                            case 2: players[i].action = "right"; break;
-                            case 3: players[i].action = "up"; break;
-                            case 4: players[i].action = "down"; break;
-                        }
-                    }
-                }
-            }
-        }
-        
-        if (players[i].action == "left") {
-
-            if (attack(players[i])) {
-
-            }
-            else if (players[i].x > 0 && map[players[i].y][players[i].x-1] <= last_walkable_tile) {
-                players[i].x -= 1;
-            }
-        }
-        else if (players[i].action == "right") {
-            if (attack(players[i])) {
-
-            }
-            else if (players[i].x < width-1 && map[players[i].y][players[i].x+1] <= last_walkable_tile) {
-                players[i].x += 1;
-            }
-        }
-        else if (players[i].action == "up") {
-            if (attack(players[i])) {
-
-            }
-            else if (players[i].y > 0 && map[players[i].y-1][players[i].x] <= last_walkable_tile) {
-                players[i].y -= 1;
-            }
-        }
-        else if (players[i].action == "down") {
-            if (attack(players[i])) {
-
-            }
-            else if (players[i].y < height-1 && map[players[i].y+1][players[i].x] <= last_walkable_tile) {
-                players[i].y += 1;
-            }
-        }
-        if (map[players[i].y][players[i].x] < last_lava_tile && map[players[i].y][players[i].x] > 1) {
-            players[i].life = 0;
-            dropItems(players[i], players[i].action, false);
-            players[i].x = -100;
-
-            var payload = new Object();
-            payload["status"] = "death_by_lava";
-            for(var j in wss.clients) {
-                // in lava, everyone can hear you scream
-                wss.clients[j].send(JSON.stringify(payload));
-            }
-
-        }
-
-        if (map[players[i].y][players[i].x] == 75) {
-            var payload = new Object();
-            payload["status"] = "exit";
-            
-            payload["player"] = players[i];
-            //console.log("sending " + payload.toString());
-            for(var j in wss.clients) {
-                if (users[wss.clients[j].upgradeReq.headers['sec-websocket-key']] == i) {
-                    wss.clients[j].send(JSON.stringify(payload));
-                }
-            }
-            players[i].life = 0;
-            dropItems(players[i], players[i].action, true);
-            players[i].x = -100;
-
-        }
-
-        var calc = false;
-        for (item in items) {
-            if (items[item].owner == "" && items[item].dead == false && items[item].x == players[i].x && items[item].y == players[i].y 
-                && notDuplicate(players[i], items[item])) {
-                items[item].x = -100;
-                if (items[item].type == "potion1" || items[item].type == "potion2" 
-                     || items[item].type == "potion3") {
-                    items[item].dead = true;
-                    players[i].life = 3;
-                } 
-                else if (items[item].type == "pineapple") {
-                    items[item].dead = true;
-                }
-                else {
-                    items[item].owner = players[i].nick;
-                    calc = true;                    
-                }
-            }
-        }
-        if (calc) {
-            calculateAndSetItems(i);
-        }
-        players[i].action = "";
-
-    }
-
-    var payload = {};
-    payload["players"] = players;
-//    payload["items"] = items;
-
-    for(var i in wss.clients) {
-        try {
-            wss.clients[i].send(JSON.stringify(payload));
-        }
-        catch (e) {
-            console.log("Woops1, error: " + e);
-        }
-    }
-}
-setInterval(process_and_send_events, 115);
-
