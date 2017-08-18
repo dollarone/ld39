@@ -249,7 +249,7 @@ this.players[1] = "Blue Sun"
 	}
 
     openConnection() {
-        this.ws = new WebSocket("ws://dollarone.games:8988") // ws://localhost:8988") //
+        this.ws = new WebSocket("ws://dollarone.games:9988") // ws://localhost:8988") //
         this.connected = false
         this.ws.onmessage = this.onMessage.bind(this)
         this.ws.onerror = this.displayError.bind(this)
